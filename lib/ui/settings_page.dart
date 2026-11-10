@@ -1,12 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:zero_trust_core/zero_trust_core.dart';
 
@@ -15,7 +10,7 @@ import '../csv/timesheet_csv.dart';
 import '../data/time_store.dart';
 import '../notify/timer_notifier.dart';
 import '../util/format.dart';
-import 'reports_tab.dart' show confirmPlainExport;
+import 'timesheet_export.dart';
 
 /// The shared Zero-Trust settings screen, with Time's own rows.
 class TimeSettingsPage extends ConsumerWidget {
@@ -129,14 +124,14 @@ class TimeSettingsPage extends ConsumerWidget {
       backupSection: <Widget>[
         ListTile(
           leading: const Icon(Icons.file_download_outlined),
-          title: const Text('Import a timesheet (.csv)'),
-          subtitle: const Text('From Toggl Track, Clockify or ZT Time'),
+          title: const Text('Import a timesheet'),
+          subtitle: const Text('Excel, LibreOffice, Google Sheets or CSV; Toggl Track, Clockify or ZT Time'),
           onTap: () => importTimesheetFile(context, ref),
         ),
         ListTile(
           leading: const Icon(Icons.file_upload_outlined),
-          title: const Text('Export all entries (.csv)'),
-          subtitle: const Text('Unencrypted file, for spreadsheets and invoicing'),
+          title: const Text('Export all entries'),
+          subtitle: const Text('Excel, LibreOffice or CSV. Unencrypted, for spreadsheets and invoicing'),
           onTap: () => _exportAll(context, ref),
         ),
       ],
@@ -212,13 +207,14 @@ class TimeSettingsPage extends ConsumerWidget {
       messenger.showSnackBar(const SnackBar(content: Text('There is nothing to export yet')));
       return;
     }
-    if (!await confirmPlainExport(context)) return;
-    final dir = await getTemporaryDirectory();
-    final file = File(
-      '${dir.path}/zt-time-${DateFormat('yyyy-MM-dd').format(DateTime.now())}.csv',
+    final projects = await repo.allProjects();
+    if (!context.mounted) return;
+    await exportTimesheet(
+      context,
+      entries: entries,
+      projects: projects,
+      fileName: 'zt-time-${DateFormat('yyyy-MM-dd').format(DateTime.now())}',
     );
-    await file.writeAsString(writeTimesheet(entries, await repo.allProjects()));
-    await SharePlus.instance.share(ShareParams(files: [XFile(file.path, mimeType: 'text/csv')]));
   }
 }
 
@@ -230,8 +226,10 @@ Future<void> importTimesheetFile(BuildContext context, WidgetRef ref) async {
     builder: (d) => AlertDialog(
       title: const Text('Import a timesheet'),
       content: const Text(
-        'Toggl Track: Reports, Detailed, Export, Download CSV.\n'
-        'Clockify: Reports, Detailed, Export, Save as CSV.\n\n'
+        'Choose an Excel (.xlsx), LibreOffice (.ods) or CSV file. From Google '
+        'Sheets: File, Download, Microsoft Excel.\n\n'
+        'The sheet needs a "Start date" column, and an end time or a duration. '
+        'Toggl Track and Clockify detailed reports work as they are.\n\n'
         'Projects in the file are created if you don\'t have them. '
         'Importing the same file again skips entries you already have.',
       ),
@@ -245,15 +243,15 @@ Future<void> importTimesheetFile(BuildContext context, WidgetRef ref) async {
   // The file picker is another app's screen: don't auto-lock behind it.
   final files = await ref
       .read(vaultControllerProvider.notifier)
-      .whileShowingSystemUi(() => FilePicker.pickFiles(dialogTitle: 'Choose a .csv file'));
+      .whileShowingSystemUi(() => FilePicker.pickFiles(dialogTitle: 'Choose a spreadsheet or .csv file'));
   if (files.isEmpty) return;
   try {
     final repo = ref.read(timeRepositoryProvider);
     var added = 0, projects = 0, skipped = 0, unreadable = 0;
     for (final f in files) {
       final bytes = await f.readAsBytes();
-      final plan = TimesheetImport.build(
-        csv: utf8.decode(bytes, allowMalformed: true),
+      final plan = TimesheetImport.fromFile(
+        bytes: bytes,
         existing: await repo.allEntries(),
         projects: await repo.allProjects(),
       );

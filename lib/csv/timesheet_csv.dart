@@ -1,16 +1,12 @@
 import 'package:flutter/foundation.dart';
+
 import 'package:uuid/uuid.dart';
 
 import '../model/project.dart';
 import '../model/report.dart';
 import '../model/time_entry.dart';
+import '../sheets/spreadsheet.dart';
 import 'csv.dart';
-
-String _two(int n) => n.toString().padLeft(2, '0');
-String _date(DateTime t) => '${t.year}-${_two(t.month)}-${_two(t.day)}';
-String _time(DateTime t) => '${_two(t.hour)}:${_two(t.minute)}:${_two(t.second)}';
-String _hms(Duration d) =>
-    '${_two(d.inHours)}:${_two(d.inMinutes % 60)}:${_two(d.inSeconds % 60)}';
 
 /// The columns this app writes. The same names Toggl Track uses, so the
 /// file opens in tools that read Toggl exports, and imports back here.
@@ -29,35 +25,41 @@ const timesheetHeader = [
   'Amount',
 ];
 
-/// A timesheet of [entries], oldest first. Running entries are left out:
-/// they have no end yet.
-String writeTimesheet(Iterable<TimeEntry> entries, Iterable<Project> projects) {
+/// A timesheet of [entries] as a CSV text, oldest first. Running entries
+/// are left out: they have no end yet.
+String writeTimesheet(Iterable<TimeEntry> entries, Iterable<Project> projects) => Csv.write([
+  for (final row in timesheetTable(entries, projects)) [for (final c in row) cellText(c)],
+]);
+
+/// A timesheet of [entries] as typed cells for [writeSheet], oldest first,
+/// with [timesheetHeader] as the first row. Running entries are left out.
+List<List<Object?>> timesheetTable(Iterable<TimeEntry> entries, Iterable<Project> projects) {
   final byId = {for (final p in projects) p.id: p};
   final sorted = [for (final e in entries) if (!e.running) e]
     ..sort((a, b) => a.start.compareTo(b.start));
-  return Csv.write([
+  return [
     timesheetHeader,
     for (final e in sorted)
       () {
         final p = byId[e.projectId];
         final d = e.durationAt(e.end!);
         final amount = e.billable ? amountFor(d, p?.hourlyRate) : 0.0;
-        return [
+        return <Object?>[
           e.description,
           p?.name ?? '',
           p?.client ?? '',
           e.tags.join(', '),
           e.billable ? 'Yes' : 'No',
-          _date(e.start),
-          _time(e.start),
-          _date(e.end!),
-          _time(e.end!),
-          _hms(d),
-          (d.inSeconds / 3600).toStringAsFixed(2),
-          amount == 0 ? '' : amount.toStringAsFixed(2),
+          SheetDate(e.start),
+          SheetTime(e.start),
+          SheetDate(e.end!),
+          SheetTime(e.end!),
+          d,
+          (d.inSeconds / 36).round() / 100,
+          amount == 0 ? null : (amount * 100).round() / 100,
         ];
       }(),
-  ]);
+  ];
 }
 
 /// What importing a timesheet file would add.
@@ -87,11 +89,54 @@ class TimesheetImport {
     required Iterable<TimeEntry> existing,
     required Iterable<Project> projects,
     String Function()? newId,
+  }) => fromSheets(
+    sheets: [Csv.parse(csv)],
+    existing: existing,
+    projects: projects,
+    newId: newId,
+  );
+
+  /// Reads a spreadsheet or CSV file's bytes (see [readSheets]): .xlsx from
+  /// Excel or Google Sheets, .ods from LibreOffice, or CSV.
+  static TimesheetImport fromFile({
+    required Uint8List bytes,
+    required Iterable<TimeEntry> existing,
+    required Iterable<Project> projects,
+    String Function()? newId,
+  }) => fromSheets(
+    sheets: readSheets(bytes),
+    existing: existing,
+    projects: projects,
+    newId: newId,
+  );
+
+  /// Imports the first sheet that has a start-date column. Its header may
+  /// sit below a few title rows.
+  static TimesheetImport fromSheets({
+    required List<List<List<String>>> sheets,
+    required Iterable<TimeEntry> existing,
+    required Iterable<Project> projects,
+    String Function()? newId,
   }) {
     final id = newId ?? const Uuid().v4;
-    final rows = Csv.parse(csv);
-    if (rows.isEmpty) throw const FormatException('The file is empty');
-    final header = [for (final h in rows.first) h.trim().toLowerCase()];
+    if (sheets.every((s) => s.isEmpty)) throw const FormatException('The file is empty');
+    List<List<String>>? rows;
+    var headerAt = 0;
+    find:
+    for (final sheet in sheets) {
+      for (var i = 0; i < sheet.length && i < 10; i++) {
+        final names = {for (final h in sheet[i]) h.trim().toLowerCase()};
+        if (names.contains('start date') || names.contains('start')) {
+          rows = sheet;
+          headerAt = i;
+          break find;
+        }
+      }
+    }
+    if (rows == null) {
+      throw const FormatException('No "Start date" column in this file');
+    }
+    final header = [for (final h in rows[headerAt]) h.trim().toLowerCase()];
     int col(List<String> names) {
       for (final n in names) {
         final i = header.indexOf(n);
@@ -119,7 +164,7 @@ class TimesheetImport {
     final guard = RegExp(r"^'(?=[=+\-@])");
     String cell(List<String> row, int c) =>
         c < 0 || c >= row.length ? '' : row[c].trim().replaceFirst(guard, '');
-    final body = rows.skip(1).toList();
+    final body = rows.skip(headerAt + 1).toList();
 
     // 03/04/2026 is March 4 in the US and 3 April elsewhere. A file where
     // some first number is above 12 can only be day-first.
