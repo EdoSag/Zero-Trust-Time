@@ -181,25 +181,45 @@ class TimerWidget {
     }
   }
 
-  /// Starts and stops tapped on the widget since the app last looked, oldest
-  /// first, and forgets them.
-  Future<List<WidgetTimerAction>> takePending() async {
+  /// Starts and stops tapped on the widget and not yet saved, oldest first,
+  /// one raw line each (see [WidgetTimerAction.parse]). They stay queued
+  /// until [acknowledge]d, so a tap is not lost if saving it fails.
+  Future<List<String>> pendingLines() async {
     if (!isSupported) return const [];
     try {
       final queue = await HomeWidget.getWidgetData<String>(_queueKey);
-      if (queue == null || queue.isEmpty) return const [];
-      // Keep a tap the widget added meanwhile.
-      final now = await HomeWidget.getWidgetData<String>(_queueKey) ?? '';
-      final rest = now.startsWith(queue)
-          ? now.substring(queue.length).trim()
-          : '';
-      await HomeWidget.saveWidgetData<String>(
-        _queueKey,
-        rest.isEmpty ? null : rest,
-      );
-      return WidgetTimerAction.parse(queue);
+      return [
+        for (final line in (queue ?? '').split('\n'))
+          if (line.trim().isNotEmpty) line.trim(),
+      ];
     } on Object {
       return const [];
+    }
+  }
+
+  /// Removes one line [pendingLines] gave, once it has been saved. Taps the
+  /// widget queued meanwhile stay.
+  Future<void> acknowledge(String line) async {
+    if (!isSupported) return;
+    final queue = await HomeWidget.getWidgetData<String>(_queueKey) ?? '';
+    final lines = [
+      for (final l in queue.split('\n'))
+        if (l.trim().isNotEmpty) l.trim(),
+    ];
+    lines.remove(line);
+    await HomeWidget.saveWidgetData<String>(
+      _queueKey,
+      lines.isEmpty ? null : lines.join('\n'),
+    );
+  }
+
+  /// Forgets every queued tap, so they never reach another account.
+  Future<void> discardPending() async {
+    if (!isSupported) return;
+    try {
+      await HomeWidget.saveWidgetData<String>(_queueKey, null);
+    } on Object {
+      // Nothing stored.
     }
   }
 

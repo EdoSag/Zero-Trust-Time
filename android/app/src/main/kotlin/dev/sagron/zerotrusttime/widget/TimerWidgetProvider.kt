@@ -1,5 +1,6 @@
 package dev.sagron.zerotrusttime.widget
 
+import android.app.AlarmManager
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -13,6 +14,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.view.View
 import android.widget.RemoteViews
+import com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver
 import dev.sagron.zerotrusttime.MainActivity
 import dev.sagron.zerotrusttime.R
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
@@ -41,6 +43,26 @@ class TimerWidgetProvider : HomeWidgetProvider() {
 
         /** The "timer running" notification's id (lib/notify/timer_notifier.dart). */
         private const val RUNNING_NOTIFICATION_ID = 1
+
+        /** The scheduled "timer still running" reminder's id (same file). */
+        private const val NUDGE_NOTIFICATION_ID = 2
+
+        /**
+         * Cancels the alarm flutter_local_notifications set for the "still
+         * running" reminder. It matches the plugin's own PendingIntent (same
+         * receiver and request code), as its cancel() does.
+         */
+        private fun cancelScheduledNudge(context: Context) {
+            val intent = Intent(context, ScheduledNotificationReceiver::class.java)
+            val pending = PendingIntent.getBroadcast(
+                context,
+                NUDGE_NOTIFICATION_ID,
+                intent,
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE,
+            ) ?: return
+            context.getSystemService(AlarmManager::class.java)?.cancel(pending)
+            pending.cancel()
+        }
 
         private val RECENT = intArrayOf(R.id.recent_0, R.id.recent_1, R.id.recent_2)
         private val RECENT_NAMES = intArrayOf(R.id.recent_0_name, R.id.recent_1_name, R.id.recent_2_name)
@@ -96,7 +118,10 @@ class TimerWidgetProvider : HomeWidgetProvider() {
         } else {
             // The app clears its notification when it next opens; don't leave
             // a clock running in the shade until then.
-            context.getSystemService(NotificationManager::class.java)?.cancel(RUNNING_NOTIFICATION_ID)
+            val notifications = context.getSystemService(NotificationManager::class.java)
+            notifications?.cancel(RUNNING_NOTIFICATION_ID)
+            notifications?.cancel(NUDGE_NOTIFICATION_ID)
+            cancelScheduledNudge(context)
         }
         editor.apply()
         val manager = AppWidgetManager.getInstance(context)

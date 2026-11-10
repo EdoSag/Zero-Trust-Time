@@ -83,6 +83,8 @@ class _AppGateState extends ConsumerState<AppGate> with WidgetsBindingObserver {
       if (user == null) {
         ref.read(vaultControllerProvider.notifier).lock();
         ref.read(timerNotifierProvider).clear().ignore();
+        // Taps queued while locked belong to this account, not the next.
+        const TimerWidget().discardPending().ignore();
         const TimerWidget().publish(const TimerWidgetState.signedOut()).ignore();
         setState(() => _signingIn = true);
       }
@@ -169,20 +171,31 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
   }
 
   /// Starts and stops tapped on the widget, at the time they were tapped.
+  /// Each is taken off the queue only once saved; if saving fails the rest
+  /// wait for the next try.
   Future<void> _applyWidgetTaps() async {
-    final taps = await const TimerWidget().takePending();
-    if (taps.isEmpty) return;
+    const widget = TimerWidget();
+    final lines = await widget.pendingLines();
+    if (lines.isEmpty) return;
     final repo = ref.read(timeRepositoryProvider);
     final projects = {for (final p in await repo.allProjects()) p.id: p};
-    for (final t in taps) {
-      if (t.stop) {
-        await repo.stopAll(at: t.at);
-      } else {
-        final project = projects[t.projectId];
-        await repo.start(projectId: project?.id, billable: project?.billable ?? false, at: t.at);
+    for (final line in lines) {
+      for (final t in WidgetTimerAction.parse(line)) {
+        if (t.stop) {
+          await repo.stopAll(at: t.at);
+        } else if (!_alreadyStarted(t.at)) {
+          final project = projects[t.projectId];
+          await repo.start(projectId: project?.id, billable: project?.billable ?? false, at: t.at);
+        }
       }
+      await widget.acknowledge(line);
     }
   }
+
+  /// A start saved just before the app was closed, and not yet taken off the
+  /// queue, is not started a second time.
+  bool _alreadyStarted(DateTime at) =>
+      ref.read(entriesProvider).value?.any((e) => e.running && e.start == at) ?? false;
 
   Future<void> _publishWidget() async {
     final entries = ref.read(entriesProvider).value;
