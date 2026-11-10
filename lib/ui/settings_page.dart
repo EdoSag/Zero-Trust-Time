@@ -96,6 +96,17 @@ class TimeSettingsPage extends ConsumerWidget {
               ? (v) => ctrl.update((x) => x.copyWith(notificationText: v))
               : null,
         ),
+        SwitchListTile(
+          secondary: const Icon(Icons.widgets_outlined),
+          title: const Text('Show details on the home screen'),
+          subtitle: const Text(
+            'Off: the timer widget shows only "Timer running" and the clock. '
+            'On: what you are tracking and your recent projects are stored '
+            'unencrypted on this phone for the home screen.',
+          ),
+          value: s.widgetDetails,
+          onChanged: (v) => ctrl.update((x) => x.copyWith(widgetDetails: v)),
+        ),
         ListTile(
           leading: const Icon(Icons.snooze_outlined),
           title: const Text('Remind me about a long timer'),

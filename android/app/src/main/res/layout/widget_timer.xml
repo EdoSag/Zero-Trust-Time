@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Timer widget (roadmap W14), in the shared Zero-Trust widget look
+  (Zero-Trust-Core/android-widget-kit). Running: a live clock and Stop.
+  Idle: Start, and recent projects to start with one tap (only with "Show
+  details on the home screen"). TimerWidgetProvider fills it and hides what
+  does not fit.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    style="@style/ZtWidget.Root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/app_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <ImageView
+            android:layout_width="@dimen/zt_widget_header_icon"
+            android:layout_height="@dimen/zt_widget_header_icon"
+            android:src="@mipmap/ic_launcher"
+            android:importantForAccessibility="no"/>
+        <TextView
+            style="@style/ZtWidget.AppName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="ZT Time"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <LinearLayout
+            android:id="@+id/main_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <Chronometer
+                android:id="@+id/clock"
+                style="@style/ZtWidget.Display"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+            <TextView
+                android:id="@+id/idle_text"
+                style="@style/ZtWidget.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Not tracking"/>
+            <TextView
+                android:id="@+id/title"
+                style="@style/ZtWidget.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tap play to start a timer"/>
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/action"
+            style="@style/ZtWidget.Action"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_zt_widget_play"
+            android:contentDescription="Start a timer"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/recent_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        <LinearLayout
+            android:id="@+id/recent_0"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:layout_marginStart="0dp"
+            android:background="@drawable/zt_widget_tile"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="10dp"
+            android:paddingEnd="8dp"
+            android:visibility="gone">
+            <ImageView
+                android:id="@+id/recent_0_dot"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:src="@drawable/widget_project_dot"
+                android:importantForAccessibility="no"/>
+            <TextView
+                android:id="@+id/recent_0_name"
+                style="@style/ZtWidget.Caption"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:textColor="@color/zt_widget_on_surface"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/recent_1"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/zt_widget_tile"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="10dp"
+            android:paddingEnd="8dp"
+            android:visibility="gone">
+            <ImageView
+                android:id="@+id/recent_1_dot"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:src="@drawable/widget_project_dot"
+                android:importantForAccessibility="no"/>
+            <TextView
+                android:id="@+id/recent_1_name"
+                style="@style/ZtWidget.Caption"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:textColor="@color/zt_widget_on_surface"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/recent_2"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/zt_widget_tile"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="10dp"
+            android:paddingEnd="8dp"
+            android:visibility="gone">
+            <ImageView
+                android:id="@+id/recent_2_dot"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:src="@drawable/widget_project_dot"
+                android:importantForAccessibility="no"/>
+            <TextView
+                android:id="@+id/recent_2_name"
+                style="@style/ZtWidget.Caption"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:textColor="@color/zt_widget_on_surface"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

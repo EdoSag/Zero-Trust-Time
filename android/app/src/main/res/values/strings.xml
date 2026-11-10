@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="timer_widget_label">Timer</string>
+    <string name="timer_widget_description">Start and stop a timer from the home screen, with a live clock</string>
+</resources>

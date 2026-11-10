@@ -8,6 +8,7 @@ import '../data/time_store.dart';
 import '../model/time_entry.dart';
 import '../notify/timer_notifier.dart';
 import '../ui/home_page.dart';
+import '../widget/timer_widget.dart';
 import 'auth_providers.dart';
 import 'time_settings.dart';
 
@@ -82,6 +83,9 @@ class _AppGateState extends ConsumerState<AppGate> with WidgetsBindingObserver {
       if (user == null) {
         ref.read(vaultControllerProvider.notifier).lock();
         ref.read(timerNotifierProvider).clear().ignore();
+        // Taps queued while locked belong to this account, not the next.
+        const TimerWidget().discardPending().ignore();
+        const TimerWidget().publish(const TimerWidgetState.signedOut()).ignore();
         setState(() => _signingIn = true);
       }
     });
@@ -126,8 +130,9 @@ class _AppGateState extends ConsumerState<AppGate> with WidgetsBindingObserver {
   }
 }
 
-/// The tracker once unlocked: runs sync and keeps the "timer running"
-/// notification in step with the running entry.
+/// The tracker once unlocked: runs sync, applies Start/Stop taps made on the
+/// home screen widget, and keeps the "timer running" notification and the
+/// widget in step with the running entry.
 class TimeHome extends ConsumerStatefulWidget {
   const TimeHome({super.key});
 
@@ -135,8 +140,11 @@ class TimeHome extends ConsumerStatefulWidget {
   ConsumerState<TimeHome> createState() => _TimeHomeState();
 }
 
-class _TimeHomeState extends ConsumerState<TimeHome> {
+class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver {
   Timer? _debounce;
+
+  /// What the widget last showed.
+  TimerWidgetState? _widgetShown;
 
   /// What the notification last showed, so an unrelated edit doesn't
   /// re-post it.
@@ -145,13 +153,62 @@ class _TimeHomeState extends ConsumerState<TimeHome> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _schedule());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _debounce?.cancel();
     super.dispose();
+  }
+
+  /// Back on screen: the widget may have been tapped meanwhile.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _schedule();
+  }
+
+  /// Starts and stops tapped on the widget, at the time they were tapped.
+  /// Each is taken off the queue only once saved; if saving fails the rest
+  /// wait for the next try.
+  Future<void> _applyWidgetTaps() async {
+    const widget = TimerWidget();
+    final lines = await widget.pendingLines();
+    if (lines.isEmpty) return;
+    final repo = ref.read(timeRepositoryProvider);
+    final projects = {for (final p in await repo.allProjects()) p.id: p};
+    for (final line in lines) {
+      for (final t in WidgetTimerAction.parse(line)) {
+        if (t.stop) {
+          await repo.stopAll(at: t.at);
+        } else if (!_alreadyStarted(t.at)) {
+          final project = projects[t.projectId];
+          await repo.start(projectId: project?.id, billable: project?.billable ?? false, at: t.at);
+        }
+      }
+      await widget.acknowledge(line);
+    }
+  }
+
+  /// A start saved just before the app was closed, and not yet taken off the
+  /// queue, is not started a second time.
+  bool _alreadyStarted(DateTime at) =>
+      ref.read(entriesProvider).value?.any((e) => e.running && e.start == at) ?? false;
+
+  Future<void> _publishWidget() async {
+    final entries = ref.read(entriesProvider).value;
+    final projects = ref.read(projectsProvider).value;
+    if (entries == null || projects == null) return;
+    final next = TimerWidgetState.from(
+      entries: entries,
+      projects: projects,
+      details: ref.read(timeSettingsProvider).widgetDetails,
+    );
+    if (next == _widgetShown) return;
+    _widgetShown = next;
+    await const TimerWidget().publish(next);
   }
 
   void _schedule() {
@@ -164,6 +221,13 @@ class _TimeHomeState extends ConsumerState<TimeHome> {
     // Until the entries have loaded, leave a notification from the last
     // run alone: the timer it belongs to is probably still running.
     if (ref.read(entriesProvider).value == null) return;
+    try {
+      await _applyWidgetTaps();
+      await _publishWidget();
+    } on Object {
+      // The widget is extra; the tracker itself still works.
+    }
+    if (!mounted) return;
     final settings = ref.read(timeSettingsProvider);
     final running = ref.read(runningProvider);
     final notifier = ref.read(timerNotifierProvider);
@@ -199,6 +263,9 @@ class _TimeHomeState extends ConsumerState<TimeHome> {
     ref.watch(ztSyncControllerProvider);
     ref.listen(runningProvider, (_, _) => _schedule());
     ref.listen(timeSettingsProvider, (_, _) => _schedule());
+    // Recent projects on the widget.
+    ref.listen(projectsProvider, (_, _) => _schedule());
+    ref.listen(entriesProvider, (_, _) => _schedule());
     return const HomePage();
   }
 }

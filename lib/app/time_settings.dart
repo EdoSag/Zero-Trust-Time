@@ -12,6 +12,7 @@ class TimeSettings {
     this.runningNotification = true,
     this.notificationText = false,
     this.nudgeAfterHours = 8,
+    this.widgetDetails = false,
   });
 
   /// [DateTime.monday] .. [DateTime.sunday], or null for the locale's.
@@ -33,6 +34,11 @@ class TimeSettings {
   /// "Still running?" after this many hours, or null for never.
   final int? nudgeAfterHours;
 
+  /// "Show details on the home screen": the timer widget shows what is
+  /// being tracked and recent projects. Off: only "Timer running" and the
+  /// clock. What it shows is stored unencrypted for the launcher.
+  final bool widgetDetails;
+
   static const _unset = Object();
 
   TimeSettings copyWith({
@@ -42,6 +48,7 @@ class TimeSettings {
     bool? runningNotification,
     bool? notificationText,
     Object? nudgeAfterHours = _unset,
+    bool? widgetDetails,
   }) => TimeSettings(
     weekStart: identical(weekStart, _unset) ? this.weekStart : weekStart as int?,
     currency: currency ?? this.currency,
@@ -51,6 +58,7 @@ class TimeSettings {
     nudgeAfterHours: identical(nudgeAfterHours, _unset)
         ? this.nudgeAfterHours
         : nudgeAfterHours as int?,
+    widgetDetails: widgetDetails ?? this.widgetDetails,
   );
 
   Map<String, String> toPrefs() => {
@@ -60,6 +68,7 @@ class TimeSettings {
     'runningNotification': '$runningNotification',
     'notificationText': '$notificationText',
     'nudgeAfterHours': '${nudgeAfterHours ?? 'never'}',
+    'widgetDetails': '$widgetDetails',
   };
 
   static TimeSettings fromPrefs(Map<String, String?> p) {
@@ -74,6 +83,7 @@ class TimeSettings {
       nudgeAfterHours: p['nudgeAfterHours'] == null
           ? d.nudgeAfterHours
           : int.tryParse(p['nudgeAfterHours']!),
+      widgetDetails: b('widgetDetails', d.widgetDetails),
     );
   }
 }
