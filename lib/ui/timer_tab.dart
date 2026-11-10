@@ -347,6 +347,8 @@ class _EntryTile extends ConsumerWidget {
           ..showSnackBar(
             SnackBar(
               content: const Text('Entry deleted'),
+              // Flutter keeps a snackbar with an action open until it is tapped.
+              persist: false,
               action: SnackBarAction(label: 'Undo', onPressed: () => repo.saveEntry(entry)),
             ),
           );
