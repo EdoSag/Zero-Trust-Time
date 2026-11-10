@@ -35,6 +35,22 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Home screen timer widget (W14). Its Start/Stop taps go to the
+             receiver below, which other apps can't reach. -->
+        <receiver
+            android:name=".widget.TimerWidgetProvider"
+            android:label="@string/timer_widget_label"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/timer_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widget.TimerWidgetTapReceiver"
+            android:exported="false" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>
