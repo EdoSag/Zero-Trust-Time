@@ -188,6 +188,41 @@ void main() {
     );
   });
 
+  test('date cells keep their time zone, and negative durations are not imported', () {
+    const ns =
+        'xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
+        'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" '
+        'xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"';
+    String cell(String attrs) => '<table:table-cell $attrs/>';
+    final ods = _zip({
+      'content.xml':
+          '<office:document-content $ns><office:body><office:spreadsheet><table:table>'
+          '<table:table-row>${cell('office:value-type="string"')}</table:table-row>'
+          '<table:table-row><table:table-cell office:value-type="string"><text:p>Start</text:p></table:table-cell>'
+          '<table:table-cell office:value-type="string"><text:p>Duration</text:p></table:table-cell></table:table-row>'
+          '<table:table-row>${cell('office:value-type="date" office:date-value="2026-11-10T09:00:00Z"')}'
+          '${cell('office:value-type="time" office:time-value="PT1H"')}</table:table-row>'
+          '<table:table-row>${cell('office:value-type="date" office:date-value="2026-11-11T09:00:00"')}'
+          '${cell('office:value-type="time" office:time-value="-PT1H"')}</table:table-row>'
+          '</table:table></office:spreadsheet></office:body></office:document-content>',
+    });
+    final plan = TimesheetImport.fromFile(bytes: ods, existing: const [], projects: const [], newId: id);
+    expect(plan.entries.single.start, DateTime.utc(2026, 11, 10, 9).toLocal());
+    expect(plan.unreadable, 1);
+
+    final xlsx = _zip({
+      'xl/workbook.xml': '<workbook><sheets><sheet/></sheets></workbook>',
+      'xl/worksheets/sheet1.xml':
+          '<worksheet><sheetData><row><c r="A1" t="inlineStr"><is><t>Start</t></is></c>'
+          '<c r="B1" t="inlineStr"><is><t>End</t></is></c></row>'
+          '<row><c r="A2" t="d"><v>2026-11-10T09:00:00Z</v></c><c r="B2" t="d"><v>2026-11-10T10:00:00.000Z</v></c></row>'
+          '</sheetData></worksheet>',
+    });
+    final x = TimesheetImport.fromFile(bytes: xlsx, existing: const [], projects: const [], newId: id);
+    expect(x.entries.single.start, DateTime.utc(2026, 11, 10, 9).toLocal());
+    expect(x.entries.single.end, DateTime.utc(2026, 11, 10, 10).toLocal());
+  });
+
   testWidgets('export asks for a file type, all three visible and tappable', (tester) async {
     SheetFormat? picked;
     await tester.pumpWidget(

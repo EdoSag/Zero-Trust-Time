@@ -162,16 +162,19 @@ abstract final class Ods {
       case 'date':
         final v = _attr(c, 'date-value');
         if (v != null) {
-          return v.replaceFirst('T', ' ').replaceFirst(RegExp(r'(\.\d+)?(Z|[+-]\d\d:?\d\d)?$'), '').replaceFirst(RegExp(r' 00:00:00$'), '');
+          // With a "Z" or offset, keep it so parsing converts to local time.
+          if (RegExp(r'T.*(Z|[+-]\d\d:?\d\d)$').hasMatch(v)) return v;
+          return v.replaceFirst('T', ' ').replaceFirst(RegExp(r'\.\d+$'), '').replaceFirst(RegExp(r' 00:00:00$'), '');
         }
       case 'time':
         final v = _attr(c, 'time-value');
         final m = v == null ? null : RegExp(r'^-?P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?$').firstMatch(v);
         if (m != null) {
-          final seconds = (int.parse(m.group(1) ?? '0') * 86400) +
+          final sign = v!.startsWith('-') ? -1 : 1;
+          final seconds = sign * ((int.parse(m.group(1) ?? '0') * 86400) +
               (int.parse(m.group(2) ?? '0') * 3600) +
               (int.parse(m.group(3) ?? '0') * 60) +
-              (double.parse(m.group(4) ?? '0')).round();
+              (double.parse(m.group(4) ?? '0')).round());
           return serialText(seconds / 86400, date: false, time: false, duration: true);
         }
       case 'boolean':

@@ -258,8 +258,9 @@ abstract final class Xlsx {
       case 'str':
         return v;
       case 'd':
-        // An ISO 8601 date stored as text.
-        return v.replaceFirst('T', ' ').replaceFirst(RegExp(r'(\.\d+)?Z?$'), '');
+        // An ISO 8601 date stored as text. Kept whole, so a "Z" or offset
+        // still converts to local time when parsed.
+        return v.trim();
       default:
         final n = double.tryParse(v.trim());
         if (n == null) return v;
