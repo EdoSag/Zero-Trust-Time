@@ -38,6 +38,9 @@ dependencies:
   uuid: ^4.5.1
   # The home screen timer widget (TimerWidgetProvider.kt).
   home_widget: ^0.9.4
+  # Reading and writing .xlsx and .ods spreadsheets on the device.
+  archive: ^4.0.0
+  xml: ^7.0.0
 
 dev_dependencies:
   flutter_test:

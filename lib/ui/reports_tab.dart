@@ -1,18 +1,14 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../app/time_settings.dart';
-import '../csv/timesheet_csv.dart';
 import '../data/time_store.dart';
 import '../model/project.dart';
 import '../model/report.dart';
 import '../util/format.dart';
 import 'project_widgets.dart';
+import 'timesheet_export.dart';
 
 enum ReportPeriod { day, week, month, year, custom }
 
@@ -99,14 +95,13 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
       messenger.showSnackBar(const SnackBar(content: Text('Nothing to export in this period')));
       return;
     }
-    if (!await confirmPlainExport(context)) return;
-    final dir = await getTemporaryDirectory();
     final f = DateFormat('yyyy-MM-dd');
-    final file = File(
-      '${dir.path}/zt-time-${f.format(report.from)}-to-${f.format(addDays(report.to, -1))}.csv',
+    await exportTimesheet(
+      context,
+      entries: finished,
+      projects: projects,
+      fileName: 'zt-time-${f.format(report.from)}-to-${f.format(addDays(report.to, -1))}',
     );
-    await file.writeAsString(writeTimesheet(finished, projects));
-    await SharePlus.instance.share(ShareParams(files: [XFile(file.path, mimeType: 'text/csv')]));
   }
 
   @override
@@ -185,7 +180,7 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
                   onPressed: () => _step(1),
                 ),
               IconButton(
-                tooltip: 'Export this period (CSV)',
+                tooltip: 'Export this period (Excel, LibreOffice or CSV)',
                 icon: const Icon(Icons.ios_share),
                 onPressed: () => _export(report, projects),
               ),
@@ -256,25 +251,6 @@ class EveryHalfMinute extends StatelessWidget {
     stream: Stream.periodic(const Duration(seconds: 30), (i) => i),
     builder: (_, _) => builder(DateTime.now()),
   );
-}
-
-/// Warns that the file about to be shared is readable by anyone.
-Future<bool> confirmPlainExport(BuildContext context) async {
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (d) => AlertDialog(
-      title: const Text('Export a timesheet?'),
-      content: const Text(
-        'The CSV file is not encrypted. Anyone who gets it can read your '
-        'entries. Share it only with people and apps you trust.',
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.of(d).pop(false), child: const Text('Cancel')),
-        TextButton(onPressed: () => Navigator.of(d).pop(true), child: const Text('Export')),
-      ],
-    ),
-  );
-  return ok == true;
 }
 
 class _Stat extends StatelessWidget {
