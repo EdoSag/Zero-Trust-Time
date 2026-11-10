@@ -45,6 +45,7 @@ class MemoryRepository extends TimeRepository {
 
   @override
   Future<void> saveEntry(TimeEntry entry) async {
+    await Future<void>.delayed(Duration.zero); // Like the real store: not instant.
     _entries[entry.id] = entry;
     _entryChanges.add(entries);
   }
@@ -234,6 +235,22 @@ void main() {
     expect(saved.projectId, 'web');
     expect(saved.billable, isTrue); // The project's default.
     expect(saved.end!.difference(saved.start), const Duration(hours: 1));
+  });
+
+  test('two starts at once still leave one timer running', () async {
+    final container = ProviderContainer(
+      overrides: [
+        timeRepositoryProvider.overrideWith((ref) => repo = MemoryRepository(ref)),
+      ],
+    );
+    addTearDown(container.dispose);
+    final r = container.read(timeRepositoryProvider);
+    await Future.wait([r.start(description: 'One'), r.start(description: 'Two')]);
+    expect(repo.entries, hasLength(2));
+    expect(repo.entries.where((e) => e.running), hasLength(1));
+    // A failed start doesn't block the next one.
+    await r.stopAll();
+    expect(repo.entries.where((e) => e.running), isEmpty);
   });
 
   test('starting a timer stops the one already running', () async {

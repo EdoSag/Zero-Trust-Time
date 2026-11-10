@@ -90,6 +90,18 @@ class TimeRepository {
 
   Future<List<Project>> allProjects() async => projectsCollection.list(await _store);
 
+  /// The last start or stop, so the next one waits for it.
+  Future<void> _turn = Future.value();
+
+  /// Runs [action] after every start and stop asked for before it. Two
+  /// quick taps on Start would otherwise both find nothing running and
+  /// leave two timers.
+  Future<T> _inTurn<T>(Future<T> Function() action) {
+    final result = _turn.then((_) => action());
+    _turn = result.then<void>((_) {}, onError: (_) {});
+    return result;
+  }
+
   /// Starts a timer now, stopping any that is running: one thing at a time.
   Future<TimeEntry> start({
     String description = '',
@@ -97,9 +109,9 @@ class TimeRepository {
     List<String> tags = const [],
     bool billable = false,
     DateTime? at,
-  }) async {
+  }) => _inTurn(() async {
     final now = at ?? DateTime.now();
-    await stopAll(at: now);
+    await _stopAll(now);
     final entry = TimeEntry(
       id: newId(),
       description: description.trim(),
@@ -110,7 +122,7 @@ class TimeRepository {
     );
     await saveEntry(entry);
     return entry;
-  }
+  });
 
   /// Starts a new timer with the same description, project and tags.
   Future<TimeEntry> continueEntry(TimeEntry e) => start(
@@ -120,15 +132,19 @@ class TimeRepository {
     billable: e.billable,
   );
 
-  Future<void> stop(TimeEntry entry, {DateTime? at}) async {
+  Future<void> stop(TimeEntry entry, {DateTime? at}) =>
+      _inTurn(() => _stop(entry, at ?? DateTime.now()));
+
+  Future<void> stopAll({DateTime? at}) => _inTurn(() => _stopAll(at ?? DateTime.now()));
+
+  Future<void> _stop(TimeEntry entry, DateTime now) async {
     if (!entry.running) return;
-    final now = at ?? DateTime.now();
     await saveEntry(entry.copyWith(end: now.isBefore(entry.start) ? entry.start : now));
   }
 
-  Future<void> stopAll({DateTime? at}) async {
+  Future<void> _stopAll(DateTime now) async {
     for (final e in await allEntries()) {
-      if (e.running) await stop(e, at: at);
+      if (e.running) await _stop(e, now);
     }
   }
 

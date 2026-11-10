@@ -122,6 +122,30 @@ void main() {
       expect(plan.entries[1].end, entries[1].end);
     });
 
+    test('names starting with = + - @ match themselves when imported back', () {
+      const internal = Project(id: 'int', name: '@internal', client: '+Partner');
+      final e = TimeEntry(
+        id: 'x',
+        description: '=sum',
+        projectId: 'int',
+        tags: const ['-low', 'ok'],
+        start: start,
+        end: start.add(const Duration(minutes: 10)),
+      );
+      final csv = writeTimesheet([e], const [internal]);
+      expect(csv, contains("'@internal"));
+      final plan = TimesheetImport.build(
+        csv: csv,
+        existing: const [],
+        projects: const [internal],
+        newId: id,
+      );
+      expect(plan.newProjects, isEmpty);
+      expect(plan.entries.single.projectId, 'int');
+      expect(plan.entries.single.description, '=sum');
+      expect(plan.entries.single.tags, ['-low', 'ok']);
+    });
+
     test('importing the same file twice adds nothing', () {
       final csv = writeTimesheet(entries, const [web]);
       final plan = TimesheetImport.build(

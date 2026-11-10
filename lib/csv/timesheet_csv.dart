@@ -114,7 +114,11 @@ class TimesheetImport {
       throw const FormatException('No "Start date" column in this file');
     }
 
-    String cell(List<String> row, int c) => c < 0 || c >= row.length ? '' : row[c].trim();
+    // Also undoes the apostrophe this app's export puts before = + - @, so
+    // a project called "@internal" matches itself when imported back.
+    final guard = RegExp(r"^'(?=[=+\-@])");
+    String cell(List<String> row, int c) =>
+        c < 0 || c >= row.length ? '' : row[c].trim().replaceFirst(guard, '');
     final body = rows.skip(1).toList();
 
     // 03/04/2026 is March 4 in the US and 3 April elsewhere. A file where
@@ -162,12 +166,11 @@ class TimesheetImport {
       }
       final entry = TimeEntry(
         id: id(),
-        // Undo the apostrophe this app's export puts before = + - @.
-        description: cell(row, cDesc).replaceFirst(RegExp(r"^'(?=[=+\-@])"), ''),
+        description: cell(row, cDesc),
         projectId: project?.id,
         tags: [
           for (final t in cell(row, cTags).split(RegExp('[,;]')))
-            if (t.trim().isNotEmpty) t.trim(),
+            if (t.trim().isNotEmpty) t.trim().replaceFirst(guard, ''),
         ],
         billable: const {'yes', 'true', '1', 'y'}.contains(cell(row, cBillable).toLowerCase()),
         start: start,
