@@ -1,7 +1,7 @@
 name: zerotrust_time
 description: "Zero-Trust Time: an end-to-end encrypted time tracker with projects, reports and exports."
 publish_to: none
-version: 0.2.0+3
+version: 0.3.0+4
 
 environment:
   sdk: ^3.9.0
