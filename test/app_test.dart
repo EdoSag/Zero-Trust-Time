@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zero_trust_core/zero_trust_core.dart';
 import 'package:zerotrust_time/app/time_config.dart';
 import 'package:zerotrust_time/data/time_store.dart';
+import 'package:zerotrust_time/l10n/l10n.dart';
 import 'package:zerotrust_time/model/project.dart';
 import 'package:zerotrust_time/model/time_entry.dart';
 import 'package:zerotrust_time/notify/timer_notifier.dart';
@@ -77,7 +77,12 @@ class MemoryRepository extends TimeRepository {
 
 late MemoryRepository repo;
 
-Widget app(Widget home, {List<TimeEntry> entries = const [], List<Project> projects = const []}) {
+Widget app(
+  Widget home, {
+  List<TimeEntry> entries = const [],
+  List<Project> projects = const [],
+  Locale locale = ZtLanguages.english,
+}) {
   return ProviderScope(
     overrides: [
       ztAppConfigProvider.overrideWithValue(timeAppConfig),
@@ -97,12 +102,9 @@ Widget app(Widget home, {List<TimeEntry> entries = const [], List<Project> proje
       // The suite's real theme: its full-width buttons break rows that a
       // plain theme lets through.
       theme: ZtTheme.light(accent: timeAppConfig.accent),
-      localizationsDelegates: const [
-        ZtL10n.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      locale: locale,
+      supportedLocales: ZtLanguages.supported,
+      localizationsDelegates: const [AppL10n.delegate, ...ZtLanguages.delegates],
       home: home,
     ),
   );

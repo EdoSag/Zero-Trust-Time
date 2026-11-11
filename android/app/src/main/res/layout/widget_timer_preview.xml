@@ -52,7 +52,7 @@
                 style="@style/ZtWidget.Title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Not tracking"
+                android:text="@string/widget_not_tracking"
                 android:visibility="gone"/>
             <TextView
                 android:id="@+id/title"
@@ -69,7 +69,7 @@
             android:layout_marginStart="8dp"
             android:padding="12dp"
             android:src="@drawable/ic_zt_widget_stop"
-            android:contentDescription="Stop the timer"/>
+            android:contentDescription="@string/widget_stop_timer"/>
     </LinearLayout>
 
     <LinearLayout

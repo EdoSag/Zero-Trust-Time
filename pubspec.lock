@@ -42,7 +42,7 @@ packages:
     source: hosted
     version: "1.0.5"
   archive:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: archive
       sha256: de5ac590b8155e4e676088d714bd41ea620449a6adc0f7950c5073874b287ddb
@@ -1115,7 +1115,7 @@ packages:
     source: hosted
     version: "1.1.0"
   xml:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: xml
       sha256: "0fe8cc98946def31cbcbc8734aa4067031e6f65ea3a78a508060bfed2200bfeb"
@@ -1142,17 +1142,17 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/zero_trust_core"
-      ref: "v0.9.0"
-      resolved-ref: cac013459d91bf167cc4775b55f1d2521f8ee91b
+      ref: "v0.10.0"
+      resolved-ref: feaa7e4140abbcb27f9c767138692616f3093468
       url: "https://github.com/EdoSag/Zero-Trust-Core.git"
     source: git
-    version: "0.9.0"
+    version: "0.10.0"
   zt_crypto:
     dependency: transitive
     description:
       path: "packages/zt_crypto"
-      ref: cac013459d91bf167cc4775b55f1d2521f8ee91b
-      resolved-ref: cac013459d91bf167cc4775b55f1d2521f8ee91b
+      ref: feaa7e4140abbcb27f9c767138692616f3093468
+      resolved-ref: feaa7e4140abbcb27f9c767138692616f3093468
       url: "https://github.com/EdoSag/Zero-Trust-Core.git"
     source: git
     version: "0.3.2"

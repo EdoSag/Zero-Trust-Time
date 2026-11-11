@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="timer_widget_label">טיימר</string>
+    <string name="timer_widget_description">הפעלה ועצירה של טיימר ממסך הבית, עם שעון חי</string>
+    <string name="widget_timer_running">טיימר פועל</string>
+    <string name="widget_stop_timer">עצירת הטיימר</string>
+    <string name="widget_signed_out">מנותק</string>
+    <string name="widget_not_tracking">לא נמדד זמן</string>
+    <string name="widget_open_to_start">צריך לפתוח את ZT Time כדי להתחיל</string>
+    <string name="widget_tap_play">אפשר להקיש על הפעלה כדי להתחיל טיימר</string>
+    <string name="widget_open_app">פתיחת ZT Time</string>
+    <string name="widget_start_timer">הפעלת טיימר</string>
+    <string name="widget_start_timer_for">הפעלת טיימר עבור %s</string>
+</resources>

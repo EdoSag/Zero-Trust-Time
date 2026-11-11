@@ -19,9 +19,15 @@ later, once the suite has sharing between accounts.
 - **Reports:** day, week, month, year or any range: total, billable time,
   amount (billable hours at each project's rate), a bar per day and a
   breakdown by project.
-- **Export:** a period or everything as CSV (Toggl Track's column names).
-- **Import:** CSV exports from Toggl Track, Clockify or this app. Missing
+- **Export:** a period or everything as Excel (.xlsx), LibreOffice (.ods) or
+  CSV, with Toggl Track's column names. Spreadsheet files hold real dates,
+  times, durations and numbers, so sorting and sums work. CSV is UTF-8 with a
+  byte-order mark, so Excel shows Hebrew correctly.
+- **Import:** .xlsx (Excel, Google Sheets), .ods (LibreOffice) or CSV,
+  including exports from Toggl Track, Clockify or this app. Columns are found
+  by name (a "Start date" column plus an end time or a duration). Missing
   projects are created; importing the same file again skips what's there.
+  Everything is read and written on the phone.
 - **Notification** (Android): a lasting notification with a live clock
   while a timer runs, and a "still running?" reminder after 8 hours
   (2 to 12, or never).
@@ -34,7 +40,7 @@ later, once the suite has sharing between accounts.
 - The running-timer notification says only "Timer running" unless you turn
   on **Description in that notification**; then that one line is handed to
   the phone so it can show while the app is locked.
-- CSV exports are plain files; the app says so before sharing one.
+- Exported spreadsheets are plain files; the app says so before sharing one.
 
 ## Build
 
@@ -58,7 +64,7 @@ Launcher icons are drawn from the suite's brand mark:
 
 ## License
 
-Copyright (C) 2026 EdoSag (https://zerotrust.bz)
+Copyright (C) 2026 Edo Sagron (https://zerotrust.bz)
 
 Zero-Trust is open source under the [GNU Affero General Public License v3.0](LICENSE)
 (AGPL-3.0-only), the same licence Signal uses.

@@ -12,6 +12,7 @@ import '../notify/timer_notifier.dart';
 import '../util/format.dart';
 import 'entry_editor_page.dart';
 import 'project_widgets.dart';
+import '../l10n/l10n.dart';
 
 /// Rebuilds once a second, for clocks that count while a timer runs.
 class EverySecond extends StatefulWidget {
@@ -90,7 +91,7 @@ class _TimerTabState extends ConsumerState<TimerTab> {
     final list = entries.value;
     if (list == null) {
       return entries.hasError
-          ? const Center(child: Text('Could not load your time entries'))
+          ? Center(child: Text(context.l10n.couldNotLoadEntries))
           : const Center(child: CircularProgressIndicator());
     }
     final running = [for (final e in list) if (e.running) e];
@@ -130,7 +131,7 @@ class _TimerTabState extends ConsumerState<TimerTab> {
             padding: const EdgeInsets.all(16),
             child: OutlinedButton(
               onPressed: () => setState(() => _daysShown += 60),
-              child: const Text('Show older entries'),
+              child: Text(context.l10n.showOlderEntries),
             ),
           ),
       ],
@@ -169,8 +170,8 @@ class _StartCard extends StatelessWidget {
               textCapitalization: TextCapitalization.sentences,
               textInputAction: TextInputAction.go,
               onSubmitted: (_) => onStart(),
-              decoration: const InputDecoration(
-                hintText: 'What are you working on?',
+              decoration: InputDecoration(
+                hintText: context.l10n.whatAreYouWorkingOn,
                 border: InputBorder.none,
               ),
             ),
@@ -179,7 +180,7 @@ class _StartCard extends StatelessWidget {
                 Flexible(child: ProjectChip(projectId: projectId, onChanged: onProject)),
                 const SizedBox(width: 8),
                 FilterChip(
-                  label: const Text('Billable'),
+                  label: Text(context.l10n.billable),
                   selected: billable,
                   onSelected: onBillable,
                 ),
@@ -188,7 +189,7 @@ class _StartCard extends StatelessWidget {
                   style: _compact,
                   onPressed: onStart,
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text('Start'),
+                  label: Text(context.l10n.start),
                 ),
               ],
             ),
@@ -225,7 +226,7 @@ class _RunningCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      entry.description.isEmpty ? '(No description)' : entry.description,
+                      entry.description.isEmpty ? context.l10n.noDescription : entry.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -239,8 +240,10 @@ class _RunningCard extends ConsumerWidget {
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            '${project == null ? 'No project' : projectLabel(project!)}'
-                            ' · since ${formatTime(context, entry.start)}',
+                            context.l10n.runningSince(
+                              project == null ? context.l10n.noProject : projectLabel(project!),
+                              formatTime(context, entry.start),
+                            ),
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onPrimaryContainer,
@@ -266,7 +269,7 @@ class _RunningCard extends ConsumerWidget {
                 style: _compact,
                 onPressed: () => ref.read(timeRepositoryProvider).stop(entry),
                 icon: const Icon(Icons.stop),
-                label: const Text('Stop'),
+                label: Text(context.l10n.stop),
               ),
             ],
           ),
@@ -341,15 +344,16 @@ class _EntryTile extends ConsumerWidget {
       ),
       onDismissed: (_) async {
         final messenger = ScaffoldMessenger.of(context);
+        final l = context.l10n;
         await repo.deleteEntry(entry.id);
         messenger
           ..clearSnackBars()
           ..showSnackBar(
             SnackBar(
-              content: const Text('Entry deleted'),
+              content: Text(l.entryDeleted),
               // Flutter keeps a snackbar with an action open until it is tapped.
               persist: false,
-              action: SnackBarAction(label: 'Undo', onPressed: () => repo.saveEntry(entry)),
+              action: SnackBarAction(label: l.undo, onPressed: () => repo.saveEntry(entry)),
             ),
           );
       },
@@ -358,7 +362,7 @@ class _EntryTile extends ConsumerWidget {
           MaterialPageRoute<void>(builder: (_) => EntryEditorPage(entry: entry)),
         ),
         title: Text(
-          entry.description.isEmpty ? '(No description)' : entry.description,
+          entry.description.isEmpty ? context.l10n.noDescription : entry.description,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -369,7 +373,7 @@ class _EntryTile extends ConsumerWidget {
             Flexible(
               child: Text(
                 [
-                  project?.name ?? 'No project',
+                  project?.name ?? context.l10n.noProject,
                   '${formatTime(context, entry.start)} – ${formatTime(context, end)}',
                   for (final t in entry.tags) '#$t',
                 ].join(' · '),
@@ -384,12 +388,12 @@ class _EntryTile extends ConsumerWidget {
           children: [
             if (entry.billable)
               Padding(
-                padding: const EdgeInsets.only(right: 6),
+                padding: const EdgeInsetsDirectional.only(end: 6),
                 child: Icon(
                   Icons.paid_outlined,
                   size: 16,
                   color: theme.colorScheme.onSurfaceVariant,
-                  semanticLabel: 'Billable',
+                  semanticLabel: context.l10n.billable,
                 ),
               ),
             Text(
@@ -399,7 +403,7 @@ class _EntryTile extends ConsumerWidget {
               ),
             ),
             IconButton(
-              tooltip: 'Start again',
+              tooltip: context.l10n.startAgain,
               icon: const Icon(Icons.play_arrow_outlined),
               onPressed: () => repo.continueEntry(entry),
             ),
@@ -422,11 +426,10 @@ class _Empty extends StatelessWidget {
         children: [
           Icon(Icons.timer_outlined, size: 56, color: theme.colorScheme.outline),
           const SizedBox(height: 12),
-          Text('Nothing tracked yet', style: theme.textTheme.titleMedium),
+          Text(context.l10n.nothingTrackedYet, style: theme.textTheme.titleMedium),
           const SizedBox(height: 4),
           Text(
-            'Start the timer above, or add time by hand with the + button. '
-            'Everything is encrypted on this phone before it syncs.',
+            context.l10n.nothingTrackedBody,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,

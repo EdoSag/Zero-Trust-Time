@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
+import '../l10n/l10n.dart';
 
 /// Shows that a timer is running, outside the app.
 abstract interface class TimerNotifier {
@@ -95,17 +96,18 @@ class LocalTimerNotifier implements TimerNotifier {
     DateTime? nudgeAt,
   }) async {
     await _init();
+    final l = currentL10n;
     // The live clock is an Android feature; iOS gets only the nudge.
     if (_android != null) {
       await _plugin.show(
         id: _runningId,
         title: title,
-        body: 'Tap to open ZT Time',
+        body: l.tapToOpen,
         notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'timer_running',
-            'Running timer',
-            channelDescription: 'Shows while a timer is running',
+            l.channelRunning,
+            channelDescription: l.channelRunningBody,
             importance: Importance.low,
             priority: Priority.low,
             ongoing: true,
@@ -126,19 +128,19 @@ class LocalTimerNotifier implements TimerNotifier {
     if (nudgeAt != null && nudgeAt.isAfter(DateTime.now())) {
       await _plugin.zonedSchedule(
         id: _nudgeId,
-        title: 'Timer still running',
-        body: 'Your timer has been running for a while. Still working?',
+        title: l.timerStillRunning,
+        body: l.timerStillRunningBody,
         // An absolute instant, so the device's time zone doesn't matter.
         scheduledDate: tz.TZDateTime.from(nudgeAt.toUtc(), tz.UTC),
-        notificationDetails: const NotificationDetails(
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'timer_nudge',
-            'Long-running timer',
-            channelDescription: 'A reminder when a timer runs for hours',
+            l.channelLong,
+            channelDescription: l.channelLongBody,
             importance: Importance.defaultImportance,
             visibility: NotificationVisibility.private,
           ),
-          iOS: DarwinNotificationDetails(),
+          iOS: const DarwinNotificationDetails(),
         ),
         // Close enough for a nudge, and needs no exact-alarm permission.
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

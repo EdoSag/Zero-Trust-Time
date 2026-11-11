@@ -1,18 +1,15 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../app/time_settings.dart';
-import '../csv/timesheet_csv.dart';
 import '../data/time_store.dart';
 import '../model/project.dart';
 import '../model/report.dart';
 import '../util/format.dart';
 import 'project_widgets.dart';
+import 'timesheet_export.dart';
+import '../l10n/l10n.dart';
 
 enum ReportPeriod { day, week, month, year, custom }
 
@@ -96,17 +93,16 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
     final messenger = ScaffoldMessenger.of(context);
     final finished = report.entries.where((e) => !e.running).toList();
     if (finished.isEmpty) {
-      messenger.showSnackBar(const SnackBar(content: Text('Nothing to export in this period')));
+      messenger.showSnackBar(SnackBar(content: Text(context.l10n.nothingToExportPeriod)));
       return;
     }
-    if (!await confirmPlainExport(context)) return;
-    final dir = await getTemporaryDirectory();
     final f = DateFormat('yyyy-MM-dd');
-    final file = File(
-      '${dir.path}/zt-time-${f.format(report.from)}-to-${f.format(addDays(report.to, -1))}.csv',
+    await exportTimesheet(
+      context,
+      entries: finished,
+      projects: projects,
+      fileName: 'zt-time-${f.format(report.from)}-to-${f.format(addDays(report.to, -1))}',
     );
-    await file.writeAsString(writeTimesheet(finished, projects));
-    await SharePlus.instance.share(ShareParams(files: [XFile(file.path, mimeType: 'text/csv')]));
   }
 
   @override
@@ -137,12 +133,12 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
             scrollDirection: Axis.horizontal,
             child: SegmentedButton<ReportPeriod>(
               showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(value: ReportPeriod.day, label: Text('Day')),
-                ButtonSegment(value: ReportPeriod.week, label: Text('Week')),
-                ButtonSegment(value: ReportPeriod.month, label: Text('Month')),
-                ButtonSegment(value: ReportPeriod.year, label: Text('Year')),
-                ButtonSegment(value: ReportPeriod.custom, label: Text('Custom')),
+              segments: [
+                ButtonSegment(value: ReportPeriod.day, label: Text(context.l10n.periodDay)),
+                ButtonSegment(value: ReportPeriod.week, label: Text(context.l10n.periodWeek)),
+                ButtonSegment(value: ReportPeriod.month, label: Text(context.l10n.periodMonth)),
+                ButtonSegment(value: ReportPeriod.year, label: Text(context.l10n.periodYear)),
+                ButtonSegment(value: ReportPeriod.custom, label: Text(context.l10n.periodCustom)),
               ],
               selected: {_period},
               onSelectionChanged: (s) {
@@ -158,7 +154,7 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
             children: [
               if (_period != ReportPeriod.custom)
                 IconButton(
-                  tooltip: 'Earlier',
+                  tooltip: context.l10n.earlier,
                   icon: const Icon(Icons.chevron_left),
                   onPressed: () => _step(-1),
                 ),
@@ -180,12 +176,12 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
               ),
               if (_period != ReportPeriod.custom)
                 IconButton(
-                  tooltip: 'Later',
+                  tooltip: context.l10n.later,
                   icon: const Icon(Icons.chevron_right),
                   onPressed: () => _step(1),
                 ),
               IconButton(
-                tooltip: 'Export this period (CSV)',
+                tooltip: context.l10n.exportPeriod,
                 icon: const Icon(Icons.ios_share),
                 onPressed: () => _export(report, projects),
               ),
@@ -194,18 +190,18 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
           Row(
             children: [
               Expanded(
-                child: _Stat(label: 'Total', value: formatDuration(report.total, decimal: decimal)),
+                child: _Stat(label: context.l10n.total, value: formatDuration(report.total, decimal: decimal)),
               ),
               Expanded(
                 child: _Stat(
-                  label: 'Billable',
+                  label: context.l10n.billable,
                   value: formatDuration(report.billable, decimal: decimal),
                 ),
               ),
               if (report.amount > 0)
                 Expanded(
                   child: _Stat(
-                    label: 'Amount',
+                    label: context.l10n.amount,
                     value: formatAmount(report.amount, settings.currency),
                   ),
                 ),
@@ -220,7 +216,7 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
             Padding(
               padding: const EdgeInsets.all(32),
               child: Text(
-                'No time tracked in this period',
+                context.l10n.noTimeInPeriod,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -256,25 +252,6 @@ class EveryHalfMinute extends StatelessWidget {
     stream: Stream.periodic(const Duration(seconds: 30), (i) => i),
     builder: (_, _) => builder(DateTime.now()),
   );
-}
-
-/// Warns that the file about to be shared is readable by anyone.
-Future<bool> confirmPlainExport(BuildContext context) async {
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (d) => AlertDialog(
-      title: const Text('Export a timesheet?'),
-      content: const Text(
-        'The CSV file is not encrypted. Anyone who gets it can read your '
-        'entries. Share it only with people and apps you trust.',
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.of(d).pop(false), child: const Text('Cancel')),
-        TextButton(onPressed: () => Navigator.of(d).pop(true), child: const Text('Export')),
-      ],
-    ),
-  );
-  return ok == true;
 }
 
 class _Stat extends StatelessWidget {
@@ -351,7 +328,7 @@ class _Bars extends StatelessWidget {
           for (final (short, full, d) in bars)
             Expanded(
               child: Tooltip(
-                message: '$full: ${formatDuration(d, decimal: decimal)}',
+                message: context.l10n.barTooltip(full, formatDuration(d, decimal: decimal)),
                 triggerMode: TooltipTriggerMode.tap,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -422,7 +399,7 @@ class _ProjectRow extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  p == null ? 'No project' : projectLabel(p),
+                  p == null ? context.l10n.noProject : projectLabel(p),
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyLarge,
                 ),

@@ -2,4 +2,15 @@
 <resources>
     <string name="timer_widget_label">Timer</string>
     <string name="timer_widget_description">Start and stop a timer from the home screen, with a live clock</string>
+    <!-- Widget text until the app has run once; after that the app saves
+         these in the language picked in its settings. -->
+    <string name="widget_timer_running">Timer running</string>
+    <string name="widget_stop_timer">Stop the timer</string>
+    <string name="widget_signed_out">Signed out</string>
+    <string name="widget_not_tracking">Not tracking</string>
+    <string name="widget_open_to_start">Open ZT Time to start tracking</string>
+    <string name="widget_tap_play">Tap play to start a timer</string>
+    <string name="widget_open_app">Open ZT Time</string>
+    <string name="widget_start_timer">Start a timer</string>
+    <string name="widget_start_timer_for">Start a timer for %s</string>
 </resources>
