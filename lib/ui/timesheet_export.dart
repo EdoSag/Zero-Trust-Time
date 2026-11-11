@@ -8,45 +8,43 @@ import '../csv/timesheet_csv.dart';
 import '../model/project.dart';
 import '../model/time_entry.dart';
 import '../sheets/spreadsheet.dart';
+import '../l10n/l10n.dart';
 
 /// Asks which file type to export, warning that the file is not encrypted.
 /// Null when cancelled.
 Future<SheetFormat?> pickExportFormat(BuildContext context) => showDialog<SheetFormat>(
   context: context,
   builder: (d) => AlertDialog(
-    title: const Text('Export a timesheet'),
+    title: Text(d.l10n.exportTimesheetTitle),
     contentPadding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
     content: SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              'The file is not encrypted. Anyone who gets it can read your '
-              'entries. Share it only with people and apps you trust.',
-            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(d.l10n.exportNotEncrypted),
           ),
           const SizedBox(height: 8),
-          for (final (format, icon, title, subtitle) in const [
+          for (final (format, icon, title, subtitle) in [
             (
               SheetFormat.xlsx,
               Icons.table_chart_outlined,
-              'Excel (.xlsx)',
-              'Excel, Google Sheets, Numbers',
+              d.l10n.formatXlsx,
+              d.l10n.formatXlsxApps,
             ),
             (
               SheetFormat.ods,
               Icons.grid_on_outlined,
-              'LibreOffice (.ods)',
-              'LibreOffice, OpenOffice, Collabora',
+              d.l10n.formatOds,
+              d.l10n.formatOdsApps,
             ),
             (
               SheetFormat.csv,
               Icons.description_outlined,
-              'CSV (.csv)',
-              'Plain text for any app, and Toggl or Clockify',
+              d.l10n.formatCsv,
+              d.l10n.formatCsvApps,
             ),
           ])
             ListTile(
@@ -60,7 +58,7 @@ Future<SheetFormat?> pickExportFormat(BuildContext context) => showDialog<SheetF
       ),
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.of(d).pop(), child: const Text('Cancel')),
+      TextButton(onPressed: () => Navigator.of(d).pop(), child: Text(d.l10n.cancel)),
     ],
   ),
 );
@@ -74,9 +72,10 @@ Future<void> exportTimesheet(
   required List<Project> projects,
   required String fileName,
 }) async {
+  final sheetName = context.l10n.sheetTimeEntries;
   final format = await pickExportFormat(context);
   if (format == null) return;
-  final bytes = writeSheet(format, timesheetTable(entries, projects), name: 'Time entries');
+  final bytes = writeSheet(format, timesheetTable(entries, projects), name: sheetName);
   final dir = await getTemporaryDirectory();
   final file = File('${dir.path}/$fileName.${format.extension}');
   await file.writeAsBytes(bytes, flush: true);

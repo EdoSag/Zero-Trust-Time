@@ -11,6 +11,7 @@ import '../ui/home_page.dart';
 import '../widget/timer_widget.dart';
 import 'auth_providers.dart';
 import 'time_settings.dart';
+import '../l10n/l10n.dart';
 
 /// Routes between the shared account screens and the time tracker.
 ///
@@ -242,7 +243,7 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
       }
       final title = settings.notificationText && entry.description.trim().isNotEmpty
           ? entry.description.trim()
-          : 'Timer running';
+          : currentL10n.timerRunning;
       final hours = settings.nudgeAfterHours;
       final key = '${entry.id}|${entry.start.toIso8601String()}|$title|$hours';
       if (key == _shown) return;

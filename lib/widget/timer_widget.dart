@@ -3,6 +3,7 @@ import 'package:home_widget/home_widget.dart';
 
 import '../model/project.dart';
 import '../model/time_entry.dart';
+import '../l10n/l10n.dart';
 
 /// What the Android home screen timer widget (`TimerWidgetProvider.kt`)
 /// shows. It lives outside the vault, so all of this is stored unencrypted
@@ -51,7 +52,7 @@ class TimerWidgetState {
         running = e;
       }
     }
-    String title = 'Timer running';
+    String title = currentL10n.timerRunning;
     if (running != null && details) {
       final project = byId[running.projectId]?.name ?? '';
       final description = running.description.trim();
@@ -174,6 +175,21 @@ class TimerWidget {
           'time_widget_recent_${i}_color',
           p == null ? null : _hex(p.color),
         );
+      }
+      // The widget's own words, in the language picked in the app.
+      final l = currentL10n;
+      for (final (key, value) in [
+        ('running', l.timerRunning),
+        ('stop', l.widgetStopTimer),
+        ('signed_out', l.widgetSignedOut),
+        ('not_tracking', l.widgetNotTracking),
+        ('open_to_start', l.widgetOpenToStart),
+        ('tap_play', l.widgetTapPlay),
+        ('open_app', l.widgetOpenApp),
+        ('start', l.widgetStartTimer),
+        ('start_for', l.widgetStartTimerFor('%s')),
+      ]) {
+        await HomeWidget.saveWidgetData<String>('time_widget_text_$key', value);
       }
       await HomeWidget.updateWidget(qualifiedAndroidName: _provider);
     } on Object catch (e) {

@@ -6,6 +6,7 @@ import 'projects_tab.dart';
 import 'reports_tab.dart';
 import 'settings_page.dart';
 import 'timer_tab.dart';
+import '../l10n/l10n.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,16 +18,16 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _tab = 0;
 
-  static const _titles = ['Timer', 'Reports', 'Projects'];
-
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    final titles = [l.tabTimer, l.tabReports, l.tabProjects];
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titles[_tab]),
+        title: Text(titles[_tab]),
         actions: [
           IconButton(
-            tooltip: 'Settings',
+            tooltip: l.settingsTooltip,
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const TimeSettingsPage()),
@@ -40,14 +41,14 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: switch (_tab) {
         0 => FloatingActionButton(
-          tooltip: 'Add time by hand',
+          tooltip: l.addTimeByHand,
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute<void>(builder: (_) => const EntryEditorPage()),
           ),
           child: const Icon(Icons.add),
         ),
         2 => FloatingActionButton(
-          tooltip: 'New project',
+          tooltip: l.newProject,
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute<void>(builder: (_) => const ProjectEditorPage()),
           ),
@@ -58,21 +59,21 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         onDestinationSelected: (i) => setState(() => _tab = i),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.timer_outlined),
-            selectedIcon: Icon(Icons.timer),
-            label: 'Timer',
+            icon: const Icon(Icons.timer_outlined),
+            selectedIcon: const Icon(Icons.timer),
+            label: l.tabTimer,
           ),
           NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: 'Reports',
+            icon: const Icon(Icons.bar_chart_outlined),
+            selectedIcon: const Icon(Icons.bar_chart),
+            label: l.tabReports,
           ),
           NavigationDestination(
-            icon: Icon(Icons.folder_outlined),
-            selectedIcon: Icon(Icons.folder),
-            label: 'Projects',
+            icon: const Icon(Icons.folder_outlined),
+            selectedIcon: const Icon(Icons.folder),
+            label: l.tabProjects,
           ),
         ],
       ),

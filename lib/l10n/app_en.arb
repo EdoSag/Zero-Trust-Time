@@ -1,0 +1,270 @@
+{
+  "@@locale": "en",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "tomorrow": "Tomorrow",
+  "durationDecimalHours": "{hours} h",
+  "@durationDecimalHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "durationMinutes": "{m}m",
+  "@durationMinutes": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{h}h",
+  "@durationHours": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{h}h {m}m",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "tabTimer": "Timer",
+  "tabReports": "Reports",
+  "tabProjects": "Projects",
+  "settingsTooltip": "Settings",
+  "addTimeByHand": "Add time by hand",
+  "newProject": "New project",
+  "couldNotLoadProjects": "Could not load your projects",
+  "perHour": "{amount}/h",
+  "@perHour": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "archived": "Archived",
+  "noProjectsYet": "No projects yet",
+  "noProjectsBody": "Group your time by project or client, and set an hourly rate to see what it is worth.",
+  "noProject": "No project",
+  "exportTimesheetTitle": "Export a timesheet",
+  "exportNotEncrypted": "The file is not encrypted. Anyone who gets it can read your entries. Share it only with people and apps you trust.",
+  "formatXlsx": "Excel (.xlsx)",
+  "formatXlsxApps": "Excel, Google Sheets, Numbers",
+  "formatOds": "LibreOffice (.ods)",
+  "formatOdsApps": "LibreOffice, OpenOffice, Collabora",
+  "formatCsv": "CSV (.csv)",
+  "formatCsvApps": "Plain text for any app, and Toggl or Clockify",
+  "cancel": "Cancel",
+  "sheetTimeEntries": "Time entries",
+  "couldNotLoadEntries": "Could not load your time entries",
+  "showOlderEntries": "Show older entries",
+  "whatAreYouWorkingOn": "What are you working on?",
+  "billable": "Billable",
+  "start": "Start",
+  "stop": "Stop",
+  "noDescription": "(No description)",
+  "runningSince": "{project} · since {time}",
+  "@runningSince": {
+    "placeholders": {
+      "project": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "entryDeleted": "Entry deleted",
+  "undo": "Undo",
+  "startAgain": "Start again",
+  "nothingTrackedYet": "Nothing tracked yet",
+  "nothingTrackedBody": "Start the timer above, or add time by hand with the + button. Everything is encrypted on this phone before it syncs.",
+  "endBeforeStart": "The end is before the start",
+  "runningInFuture": "A running timer can't start in the future",
+  "discardTimerQuestion": "Discard this timer?",
+  "deleteEntryQuestion": "Delete this entry?",
+  "discard": "Discard",
+  "delete": "Delete",
+  "runningTimer": "Running timer",
+  "editEntry": "Edit entry",
+  "addTime": "Add time",
+  "discardTimer": "Discard timer",
+  "deleteEntry": "Delete entry",
+  "save": "Save",
+  "description": "Description",
+  "end": "End",
+  "tags": "Tags",
+  "tagsHelper": "Separate with commas: meeting, design",
+  "nothingToExportPeriod": "Nothing to export in this period",
+  "periodDay": "Day",
+  "periodWeek": "Week",
+  "periodMonth": "Month",
+  "periodYear": "Year",
+  "periodCustom": "Custom",
+  "earlier": "Earlier",
+  "later": "Later",
+  "exportPeriod": "Export this period (Excel, LibreOffice or CSV)",
+  "total": "Total",
+  "amount": "Amount",
+  "noTimeInPeriod": "No time tracked in this period",
+  "barTooltip": "{label}: {duration}",
+  "@barTooltip": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "projectNameRequired": "Give the project a name",
+  "rateInvalid": "Enter a number, like 60 or 42.50",
+  "deleteProjectQuestion": "Delete this project?",
+  "deleteProjectBody": "Its time entries are kept and show as \"No project\". To hide a project but keep its reports, archive it instead.",
+  "editProject": "Edit project",
+  "deleteProject": "Delete project",
+  "projectName": "Project name",
+  "clientOptional": "Client (optional)",
+  "colour": "Colour",
+  "colourNumber": "Colour {n}",
+  "@colourNumber": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hourlyRateOptional": "Hourly rate (optional)",
+  "hourlyRateHelper": "Reports turn billable hours into an amount",
+  "billableByDefault": "Billable by default",
+  "billableByDefaultBody": "New entries on this project start as billable",
+  "archivedBody": "Hidden when picking a project; reports keep it",
+  "startOfWeek": "Start of the week",
+  "likeYourRegionDay": "Like your region ({day})",
+  "@likeYourRegionDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "likeYourRegion": "Like your region",
+  "currency": "Currency",
+  "currencySubtitle": "{currency}  (for hourly rates and amounts)",
+  "@currencySubtitle": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "decimalHours": "Decimal hours",
+  "decimalHoursBody": "Show totals as 7.50 h instead of 7h 30m",
+  "runningNotification": "Notification while a timer runs",
+  "runningNotificationBody": "A lasting notification with a live clock (Android)",
+  "notificationDescription": "Description in that notification",
+  "notificationDescriptionBody": "Off: it only says \"Timer running\". On, the description is handed to the phone so it can show while Time is locked.",
+  "widgetDetails": "Show details on the home screen",
+  "widgetDetailsBody": "Off: the timer widget shows only \"Timer running\" and the clock. On: what you are tracking and your recent projects are stored unencrypted on this phone for the home screen.",
+  "remindLongTimer": "Remind me about a long timer",
+  "never": "Never",
+  "afterHours": "After {hours} hours",
+  "@afterHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "importTimesheet": "Import a timesheet",
+  "importTimesheetBody": "Excel, LibreOffice, Google Sheets or CSV; Toggl Track, Clockify or ZT Time",
+  "exportAllEntries": "Export all entries",
+  "exportAllEntriesBody": "Excel, LibreOffice or CSV. Unencrypted, for spreadsheets and invoicing",
+  "other": "Other",
+  "useThis": "Use this",
+  "nothingToExportYet": "There is nothing to export yet",
+  "importHelp": "Choose an Excel (.xlsx), LibreOffice (.ods) or CSV file. From Google Sheets: File, Download, Microsoft Excel.\n\nThe sheet needs a \"Start date\" column, and an end time or a duration. Toggl Track and Clockify detailed reports work as they are.\n\nProjects in the file are created if you don't have them. Importing the same file again skips entries you already have.",
+  "chooseFile": "Choose file",
+  "chooseSpreadsheet": "Choose a spreadsheet or .csv file",
+  "importedEntries": "{count, plural, =1{Imported 1 entry} other{Imported {count} entries}}",
+  "@importedEntries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importedProjects": "{count, plural, =1{and 1 new project} other{and {count} new projects}}",
+  "@importedProjects": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importedSkipped": "skipped {count} already here",
+  "@importedSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importedUnreadable": "{count} rows had no readable times",
+  "@importedUnreadable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotImportReason": "Could not import that file: {reason}",
+  "@couldNotImportReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotImport": "Could not import that file",
+  "errFileEmpty": "The file is empty",
+  "errNoStartDate": "No \"Start date\" column in this file",
+  "errFileDamaged": "The file is damaged",
+  "errNotSpreadsheet": "Not a spreadsheet. Use .xlsx, .ods or .csv",
+  "errOldXls": "Old .xls files can't be read. Save it as .xlsx or .csv first",
+  "timerRunning": "Timer running",
+  "tapToOpen": "Tap to open ZT Time",
+  "channelRunning": "Running timer",
+  "channelRunningBody": "Shows while a timer is running",
+  "timerStillRunning": "Timer still running",
+  "timerStillRunningBody": "Your timer has been running for a while. Still working?",
+  "channelLong": "Long-running timer",
+  "channelLongBody": "A reminder when a timer runs for hours",
+  "widgetStopTimer": "Stop the timer",
+  "widgetSignedOut": "Signed out",
+  "widgetNotTracking": "Not tracking",
+  "widgetOpenToStart": "Open ZT Time to start tracking",
+  "widgetTapPlay": "Tap play to start a timer",
+  "widgetOpenApp": "Open ZT Time",
+  "widgetStartTimer": "Start a timer",
+  "widgetStartTimerFor": "Start a timer for {project}",
+  "@widgetStartTimerFor": {
+    "placeholders": {
+      "project": {
+        "type": "String"
+      }
+    }
+  }
+}

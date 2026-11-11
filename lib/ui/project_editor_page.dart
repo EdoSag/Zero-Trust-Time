@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app/time_settings.dart';
 import '../data/time_store.dart';
 import '../model/project.dart';
+import '../l10n/l10n.dart';
 
 /// Creates or edits a project. Pops with the saved project.
 class ProjectEditorPage extends ConsumerStatefulWidget {
@@ -43,9 +44,9 @@ class _ProjectEditorPageState extends ConsumerState<ProjectEditorPage> {
     final rateText = _rate.text.trim().replaceAll(',', '.');
     final rate = rateText.isEmpty ? null : double.tryParse(rateText);
     setState(() {
-      _nameError = name.isEmpty ? 'Give the project a name' : null;
+      _nameError = name.isEmpty ? context.l10n.projectNameRequired : null;
       _rateError = rateText.isNotEmpty && (rate == null || rate < 0)
-          ? 'Enter a number, like 60 or 42.50'
+          ? context.l10n.rateInvalid
           : null;
     });
     if (_nameError != null || _rateError != null) return;
@@ -66,14 +67,11 @@ class _ProjectEditorPageState extends ConsumerState<ProjectEditorPage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: const Text('Delete this project?'),
-        content: const Text(
-          'Its time entries are kept and show as "No project". To hide a '
-          'project but keep its reports, archive it instead.',
-        ),
+        title: Text(d.l10n.deleteProjectQuestion),
+        content: Text(d.l10n.deleteProjectBody),
         actions: [
-          TextButton(onPressed: () => Navigator.of(d).pop(false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.of(d).pop(true), child: const Text('Delete')),
+          TextButton(onPressed: () => Navigator.of(d).pop(false), child: Text(d.l10n.cancel)),
+          TextButton(onPressed: () => Navigator.of(d).pop(true), child: Text(d.l10n.delete)),
         ],
       ),
     );
@@ -88,15 +86,15 @@ class _ProjectEditorPageState extends ConsumerState<ProjectEditorPage> {
     final editing = widget.project != null;
     return Scaffold(
       appBar: AppBar(
-        title: Text(editing ? 'Edit project' : 'New project'),
+        title: Text(editing ? context.l10n.editProject : context.l10n.newProject),
         actions: [
           if (editing)
             IconButton(
-              tooltip: 'Delete project',
+              tooltip: context.l10n.deleteProject,
               icon: const Icon(Icons.delete_outline),
               onPressed: _delete,
             ),
-          TextButton(onPressed: _save, child: const Text('Save')),
+          TextButton(onPressed: _save, child: Text(context.l10n.save)),
         ],
       ),
       body: ListView(
@@ -107,7 +105,7 @@ class _ProjectEditorPageState extends ConsumerState<ProjectEditorPage> {
             autofocus: !editing,
             textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
-              labelText: 'Project name',
+              labelText: context.l10n.projectName,
               errorText: _nameError,
               border: const OutlineInputBorder(),
             ),
@@ -116,13 +114,13 @@ class _ProjectEditorPageState extends ConsumerState<ProjectEditorPage> {
           TextField(
             controller: _client,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(
-              labelText: 'Client (optional)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.l10n.clientOptional,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 16),
-          Text('Colour', style: Theme.of(context).textTheme.labelLarge),
+          Text(context.l10n.colour, style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 8),
           Wrap(
             spacing: 12,
@@ -132,7 +130,7 @@ class _ProjectEditorPageState extends ConsumerState<ProjectEditorPage> {
                 Semantics(
                   button: true,
                   selected: c == _color,
-                  label: 'Colour ${projectColors.indexOf(c) + 1}',
+                  label: context.l10n.colourNumber(projectColors.indexOf(c) + 1),
                   child: InkWell(
                     customBorder: const CircleBorder(),
                     onTap: () => setState(() => _color = c),
@@ -153,9 +151,9 @@ class _ProjectEditorPageState extends ConsumerState<ProjectEditorPage> {
             controller: _rate,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
-              labelText: 'Hourly rate (optional)',
+              labelText: context.l10n.hourlyRateOptional,
               prefixText: '$currency ',
-              helperText: 'Reports turn billable hours into an amount',
+              helperText: context.l10n.hourlyRateHelper,
               errorText: _rateError,
               border: const OutlineInputBorder(),
             ),
@@ -163,16 +161,16 @@ class _ProjectEditorPageState extends ConsumerState<ProjectEditorPage> {
           const SizedBox(height: 8),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Billable by default'),
-            subtitle: const Text('New entries on this project start as billable'),
+            title: Text(context.l10n.billableByDefault),
+            subtitle: Text(context.l10n.billableByDefaultBody),
             value: _billable,
             onChanged: (v) => setState(() => _billable = v),
           ),
           if (editing)
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Archived'),
-              subtitle: const Text('Hidden when picking a project; reports keep it'),
+              title: Text(context.l10n.archived),
+              subtitle: Text(context.l10n.archivedBody),
               value: _archived,
               onChanged: (v) => setState(() => _archived = v),
             ),

@@ -56,13 +56,13 @@
                 style="@style/ZtWidget.Title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Not tracking"/>
+                android:text="@string/widget_not_tracking"/>
             <TextView
                 android:id="@+id/title"
                 style="@style/ZtWidget.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tap play to start a timer"/>
+                android:text="@string/widget_tap_play"/>
         </LinearLayout>
         <ImageView
             android:id="@+id/action"
@@ -72,7 +72,7 @@
             android:layout_marginStart="8dp"
             android:padding="12dp"
             android:src="@drawable/ic_zt_widget_play"
-            android:contentDescription="Start a timer"/>
+            android:contentDescription="@string/widget_start_timer"/>
     </LinearLayout>
 
     <LinearLayout

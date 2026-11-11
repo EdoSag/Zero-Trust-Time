@@ -6,6 +6,7 @@ import '../data/time_store.dart';
 import '../model/time_entry.dart';
 import '../util/format.dart';
 import 'project_widgets.dart';
+import '../l10n/l10n.dart';
 
 /// Adds time by hand, or edits an entry (a running one too).
 class EntryEditorPage extends ConsumerStatefulWidget {
@@ -69,11 +70,11 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
   Future<void> _save() async {
     final end = _end;
     if (!_running && end != null && end.isBefore(_start)) {
-      setState(() => _error = 'The end is before the start');
+      setState(() => _error = context.l10n.endBeforeStart);
       return;
     }
     if (_running && _start.isAfter(DateTime.now())) {
-      setState(() => _error = 'A running timer can\'t start in the future');
+      setState(() => _error = context.l10n.runningInFuture);
       return;
     }
     final entry = TimeEntry(
@@ -97,12 +98,12 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: Text(_running ? 'Discard this timer?' : 'Delete this entry?'),
+        title: Text(_running ? d.l10n.discardTimerQuestion : d.l10n.deleteEntryQuestion),
         actions: [
-          TextButton(onPressed: () => Navigator.of(d).pop(false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(d).pop(false), child: Text(d.l10n.cancel)),
           TextButton(
             onPressed: () => Navigator.of(d).pop(true),
-            child: Text(_running ? 'Discard' : 'Delete'),
+            child: Text(_running ? d.l10n.discard : d.l10n.delete),
           ),
         ],
       ),
@@ -122,15 +123,15 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
     final end = _end;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_running ? 'Running timer' : editing ? 'Edit entry' : 'Add time'),
+        title: Text(_running ? context.l10n.runningTimer : editing ? context.l10n.editEntry : context.l10n.addTime),
         actions: [
           if (editing)
             IconButton(
-              tooltip: _running ? 'Discard timer' : 'Delete entry',
+              tooltip: _running ? context.l10n.discardTimer : context.l10n.deleteEntry,
               icon: const Icon(Icons.delete_outline),
               onPressed: _delete,
             ),
-          TextButton(onPressed: _save, child: const Text('Save')),
+          TextButton(onPressed: _save, child: Text(context.l10n.save)),
         ],
       ),
       body: ListView(
@@ -143,9 +144,9 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
               autofocus: !editing,
               textCapitalization: TextCapitalization.sentences,
               maxLines: null,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: context.l10n.description,
+                border: const OutlineInputBorder(),
               ),
             ),
           ),
@@ -164,7 +165,7 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
           ),
           ListTile(
             leading: const Icon(Icons.play_circle_outline),
-            title: const Text('Start'),
+            title: Text(context.l10n.start),
             subtitle: Text(_when(_start)),
             onTap: () async {
               final picked = await _pick(_start);
@@ -180,7 +181,7 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
           if (!_running && end != null)
             ListTile(
               leading: const Icon(Icons.stop_circle_outlined),
-              title: const Text('End'),
+              title: Text(context.l10n.end),
               subtitle: Text(_when(end)),
               trailing: Text(
                 end.isBefore(_start) ? '' : formatDuration(end.difference(_start)),
@@ -202,7 +203,7 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
             ),
           SwitchListTile(
             secondary: const Icon(Icons.paid_outlined),
-            title: const Text('Billable'),
+            title: Text(context.l10n.billable),
             value: _billable,
             onChanged: (v) => setState(() => _billable = v),
           ),
@@ -210,10 +211,10 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
               controller: _tags,
-              decoration: const InputDecoration(
-                labelText: 'Tags',
-                helperText: 'Separate with commas: meeting, design',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: context.l10n.tags,
+                helperText: context.l10n.tagsHelper,
+                border: const OutlineInputBorder(),
               ),
             ),
           ),
