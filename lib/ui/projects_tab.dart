@@ -8,6 +8,7 @@ import '../model/time_entry.dart';
 import '../util/format.dart';
 import 'project_editor_page.dart';
 import 'project_widgets.dart';
+import '../l10n/l10n.dart';
 
 class ProjectsTab extends ConsumerWidget {
   const ProjectsTab({super.key});
@@ -20,7 +21,7 @@ class ProjectsTab extends ConsumerWidget {
     final list = projects.value;
     if (list == null) {
       return projects.hasError
-          ? const Center(child: Text('Could not load your projects'))
+          ? Center(child: Text(context.l10n.couldNotLoadProjects))
           : const Center(child: CircularProgressIndicator());
     }
     if (list.isEmpty) {
@@ -46,7 +47,7 @@ class ProjectsTab extends ConsumerWidget {
       ),
       trailing: p.hourlyRate == null
           ? null
-          : Text('${formatAmount(p.hourlyRate!, ref.watch(timeSettingsProvider).currency)}/h'),
+          : Text(context.l10n.perHour(formatAmount(p.hourlyRate!, ref.watch(timeSettingsProvider).currency))),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(builder: (_) => ProjectEditorPage(project: p)),
       ),
@@ -59,7 +60,7 @@ class ProjectsTab extends ConsumerWidget {
         if (archived.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
-            child: Text('Archived', style: Theme.of(context).textTheme.labelLarge),
+            child: Text(context.l10n.archived, style: Theme.of(context).textTheme.labelLarge),
           ),
           for (final p in archived) Opacity(opacity: 0.6, child: tile(p)),
         ],
@@ -82,11 +83,10 @@ class _Empty extends StatelessWidget {
           children: [
             Icon(Icons.folder_outlined, size: 56, color: theme.colorScheme.outline),
             const SizedBox(height: 12),
-            Text('No projects yet', style: theme.textTheme.titleMedium),
+            Text(context.l10n.noProjectsYet, style: theme.textTheme.titleMedium),
             const SizedBox(height: 4),
             Text(
-              'Group your time by project or client, and set an hourly rate '
-              'to see what it is worth.',
+              context.l10n.noProjectsBody,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,

@@ -112,7 +112,7 @@ class TimerWidgetProvider : HomeWidgetProvider() {
             val index = (0 until MAX_RECENT).firstOrNull { prefs.getString("time_widget_recent_${it}_id", null) == projectId }
             editor.putString(
                 "time_widget_title",
-                index?.let { prefs.getString("time_widget_recent_${it}_name", null) } ?: "Timer running",
+                index?.let { prefs.getString("time_widget_recent_${it}_name", null) } ?: text(context, prefs, "running", R.string.widget_timer_running),
             )
             editor.putString("time_widget_color", index?.let { prefs.getString("time_widget_recent_${it}_color", null) })
         } else {
@@ -149,28 +149,33 @@ class TimerWidgetProvider : HomeWidgetProvider() {
             views.setChronometer(R.id.clock, base, null, true)
             views.setViewVisibility(R.id.clock, View.VISIBLE)
             views.setViewVisibility(R.id.idle_text, View.GONE)
-            views.setTextViewText(R.id.title, prefs.getString("time_widget_title", null) ?: "Timer running")
+            views.setTextViewText(R.id.title, prefs.getString("time_widget_title", null) ?: text(context, prefs, "running", R.string.widget_timer_running))
             views.setImageViewResource(R.id.action, R.drawable.ic_zt_widget_stop)
-            views.setContentDescription(R.id.action, "Stop the timer")
+            views.setContentDescription(R.id.action, text(context, prefs, "stop", R.string.widget_stop_timer))
             views.setOnClickPendingIntent(R.id.action, broadcast(context, ACTION_STOP, null, 0))
         } else {
             views.setChronometer(R.id.clock, SystemClock.elapsedRealtime(), null, false)
             views.setViewVisibility(R.id.clock, View.GONE)
             views.setViewVisibility(R.id.idle_text, View.VISIBLE)
-            views.setTextViewText(R.id.idle_text, if (signedOut) "Signed out" else "Not tracking")
+            views.setTextViewText(
+                R.id.idle_text,
+                if (signedOut) text(context, prefs, "signed_out", R.string.widget_signed_out)
+                else text(context, prefs, "not_tracking", R.string.widget_not_tracking),
+            )
             views.setTextViewText(
                 R.id.title,
-                if (signedOut) "Open ZT Time to start tracking" else "Tap play to start a timer",
+                if (signedOut) text(context, prefs, "open_to_start", R.string.widget_open_to_start)
+                else text(context, prefs, "tap_play", R.string.widget_tap_play),
             )
             if (signedOut) {
                 views.setImageViewResource(R.id.action, R.drawable.ic_zt_widget_lock)
                 views.setInt(R.id.action, "setBackgroundResource", R.drawable.zt_widget_tile_circle)
                 views.setInt(R.id.action, "setColorFilter", context.getColor(R.color.zt_widget_on_surface_variant))
-                views.setContentDescription(R.id.action, "Open ZT Time")
+                views.setContentDescription(R.id.action, text(context, prefs, "open_app", R.string.widget_open_app))
                 views.setOnClickPendingIntent(R.id.action, open(context))
             } else {
                 views.setImageViewResource(R.id.action, R.drawable.ic_zt_widget_play)
-                views.setContentDescription(R.id.action, "Start a timer")
+                views.setContentDescription(R.id.action, text(context, prefs, "start", R.string.widget_start_timer))
                 views.setOnClickPendingIntent(R.id.action, broadcast(context, ACTION_START, null, 0))
             }
         }
@@ -195,11 +200,23 @@ class TimerWidgetProvider : HomeWidgetProvider() {
                 Color.GRAY
             }
             views.setInt(RECENT_DOTS[i], "setColorFilter", color)
-            views.setContentDescription(RECENT[i], "Start a timer for ${prefs.getString("time_widget_recent_${i}_name", null) ?: "this project"}")
+            views.setContentDescription(
+                RECENT[i],
+                text(context, prefs, "start_for", R.string.widget_start_timer_for)
+                    .replace("%s", prefs.getString("time_widget_recent_${i}_name", null) ?: ""),
+            )
             views.setOnClickPendingIntent(RECENT[i], broadcast(context, ACTION_START, id, i + 1))
         }
         return views
     }
+
+    /**
+     * A widget string in the language picked in the app (saved by
+     * timer_widget.dart as time_widget_text_<key>), or the phone's language
+     * from strings.xml until the app has run once.
+     */
+    private fun text(context: Context, prefs: SharedPreferences, key: String, fallback: Int): String =
+        prefs.getString("time_widget_text_$key", null) ?: context.getString(fallback)
 
     private fun open(context: Context): PendingIntent =
         HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse("zttime://open"))

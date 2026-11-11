@@ -11,6 +11,7 @@ import 'package:zerotrust_time/model/project.dart';
 import 'package:zerotrust_time/model/time_entry.dart';
 import 'package:zerotrust_time/sheets/spreadsheet.dart';
 import 'package:zerotrust_time/ui/timesheet_export.dart';
+import 'package:zerotrust_time/l10n/l10n.dart';
 
 Uint8List _zip(Map<String, String> files) {
   final a = Archive();
@@ -228,6 +229,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ZtTheme.light(accent: timeAppConfig.accent),
+        localizationsDelegates: const [AppL10n.delegate, ...ZtLanguages.delegates],
         home: Builder(
           builder: (context) => Scaffold(
             body: Center(
@@ -240,6 +242,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle(); // Loads the strings.
     await tester.tap(find.text('go'));
     await tester.pumpAndSettle();
     expect(find.textContaining('not encrypted'), findsOneWidget);

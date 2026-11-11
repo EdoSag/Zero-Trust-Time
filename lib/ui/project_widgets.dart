@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/time_store.dart';
 import '../model/project.dart';
 import 'project_editor_page.dart';
+import '../l10n/l10n.dart';
 
 class ProjectDot extends StatelessWidget {
   const ProjectDot(this.color, {super.key, this.size = 10});
@@ -41,7 +42,7 @@ class ProjectChip extends ConsumerWidget {
     return ActionChip(
       avatar: ProjectDot(current?.color ?? noProjectColor),
       label: Text(
-        current == null ? 'No project' : projectLabel(current),
+        current == null ? context.l10n.noProject : projectLabel(current),
         overflow: TextOverflow.ellipsis,
       ),
       onPressed: () async {
@@ -80,7 +81,7 @@ Future<PickedProject?> pickProject(BuildContext context, {String? selected}) {
               children: [
                 ListTile(
                   leading: const ProjectDot(noProjectColor, size: 14),
-                  title: const Text('No project'),
+                  title: Text(context.l10n.noProject),
                   selected: selected == null,
                   onTap: () => Navigator.of(sheet).pop(const PickedProject(null)),
                 ),
@@ -94,7 +95,7 @@ Future<PickedProject?> pickProject(BuildContext context, {String? selected}) {
                   ),
                 ListTile(
                   leading: const Icon(Icons.add),
-                  title: const Text('New project'),
+                  title: Text(context.l10n.newProject),
                   onTap: () async {
                     final created = await Navigator.of(context).push<Project>(
                       MaterialPageRoute(builder: (_) => const ProjectEditorPage()),

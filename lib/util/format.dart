@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/l10n.dart';
 
 DateTime dayOf(DateTime t) => DateTime(t.year, t.month, t.day);
 
@@ -25,14 +26,15 @@ String formatTime(BuildContext context, DateTime t) {
   );
 }
 
-/// "Today", "Yesterday" or "Tue, Nov 10".
+/// "Today", "Yesterday" or "Tue, Nov 10", in the app's language.
 String relativeDay(DateTime d, {DateTime? now}) {
   final today = dayOf(now ?? DateTime.now());
   final diff = (dayOf(d).difference(today).inHours / 24).round();
+  final l = currentL10n;
   return switch (diff) {
-    0 => 'Today',
-    -1 => 'Yesterday',
-    1 => 'Tomorrow',
+    0 => l.today,
+    -1 => l.yesterday,
+    1 => l.tomorrow,
     _ => d.year == today.year
         ? DateFormat.MMMEd().format(d)
         : DateFormat.yMMMEd().format(d),
@@ -50,12 +52,13 @@ String formatClock(Duration d) {
 /// A total: "7h 30m", "45m", "0m"; or "7.50 h" with [decimal].
 String formatDuration(Duration d, {bool decimal = false}) {
   final s = d.isNegative ? 0 : d.inSeconds;
-  if (decimal) return '${(s / 3600).toStringAsFixed(2)} h';
+  final l = currentL10n;
+  if (decimal) return l.durationDecimalHours((s / 3600).toStringAsFixed(2));
   final minutes = (s / 60).round();
   final h = minutes ~/ 60;
   final m = minutes % 60;
-  if (h == 0) return '${m}m';
-  return m == 0 ? '${h}h' : '${h}h ${m}m';
+  if (h == 0) return l.durationMinutes(m);
+  return m == 0 ? l.durationHours(h) : l.durationHoursMinutes(h, m);
 }
 
 /// "$1,234.50" with the currency sign from settings.
