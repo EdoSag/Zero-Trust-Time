@@ -111,6 +111,9 @@ abstract final class Ods {
   /// rest of a sheet as one row repeated about a million times.
   static const _maxRepeat = 10000;
 
+  /// The widest a sheet can be in LibreOffice and Excel.
+  static const _maxColumns = 16384;
+
   static List<List<List<String>>> read(Archive zip) {
     final f = zip.findFile('content.xml')!;
     final XmlDocument doc;
@@ -135,11 +138,13 @@ abstract final class Ods {
             pendingEmpty += repeat;
             continue;
           }
-          for (var i = 0; i < pendingEmpty; i++) {
+          // A file can claim a billion empty columns before a value; no
+          // sheet is wider than [_maxColumns], so the rest is left out.
+          for (var i = 0; i < pendingEmpty && cells.length < _maxColumns; i++) {
             cells.add('');
           }
           pendingEmpty = 0;
-          for (var i = 0; i < repeat.clamp(1, 1024); i++) {
+          for (var i = 0; i < repeat.clamp(1, 1024) && cells.length < _maxColumns; i++) {
             cells.add(text);
           }
         }

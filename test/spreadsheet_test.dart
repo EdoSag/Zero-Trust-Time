@@ -168,6 +168,26 @@ void main() {
     expect(e.end, DateTime(2026, 11, 10, 10, 30));
   });
 
+  test('a file that claims a billion empty columns still opens', () {
+    const ns =
+        'xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
+        'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" '
+        'xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"';
+    final bytes = _zip({
+      'content.xml':
+          '<office:document-content $ns><office:body><office:spreadsheet><table:table>'
+          '<table:table-row>'
+          '<table:table-cell office:value-type="string"><text:p>a</text:p></table:table-cell>'
+          '<table:table-cell table:number-columns-repeated="1000000000"/>'
+          '<table:table-cell office:value-type="string"><text:p>b</text:p></table:table-cell>'
+          '</table:table-row>'
+          '</table:table></office:spreadsheet></office:body></office:document-content>',
+    });
+    final row = readSheets(bytes).single.single;
+    expect(row.first, 'a');
+    expect(row.length, lessThanOrEqualTo(16384));
+  });
+
   test('reads UTF-16 text and says old .xls files need saving as .xlsx', () {
     const text = 'Description\tStart date\tDuration\nשלום\t2026-11-10 09:00\t1.5\n';
     final utf16 = Uint8List.fromList([
