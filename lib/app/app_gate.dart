@@ -146,6 +146,7 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
 
   /// What the widget last showed.
   TimerWidgetState? _widgetShown;
+  String? _widgetLanguage;
 
   /// What the notification last showed, so an unrelated edit doesn't
   /// re-post it.
@@ -207,8 +208,11 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
       projects: projects,
       details: ref.read(timeSettingsProvider).widgetDetails,
     );
-    if (next == _widgetShown) return;
+    // The widget's texts are in the app's language: republish when it changes.
+    final language = currentL10n.localeName;
+    if (next == _widgetShown && language == _widgetLanguage) return;
     _widgetShown = next;
+    _widgetLanguage = language;
     await const TimerWidget().publish(next);
   }
 
@@ -245,7 +249,8 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
           ? entry.description.trim()
           : currentL10n.timerRunning;
       final hours = settings.nudgeAfterHours;
-      final key = '${entry.id}|${entry.start.toIso8601String()}|$title|$hours';
+      final key = '${entry.id}|${entry.start.toIso8601String()}|$title|$hours'
+          '|${currentL10n.localeName}';
       if (key == _shown) return;
       _shown = key;
       await notifier.showRunning(
@@ -267,6 +272,9 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
     // Recent projects on the widget.
     ref.listen(projectsProvider, (_, _) => _schedule());
     ref.listen(entriesProvider, (_, _) => _schedule());
+    // The notification and widget texts follow a language change; the
+    // debounce lets the new language load first.
+    ref.listen(ztLanguageProvider, (_, _) => _schedule());
     return const HomePage();
   }
 }
