@@ -1,0 +1,24 @@
+Zero-Trust Time is a simple time tracker for freelancers and anyone who bills by the hour. Start a timer, sort time into projects and see where your week went, while your clients and rates stay encrypted on your phone.
+
+WHAT IT DOES
+• One-tap timer that keeps running across your devices.
+• Add or edit time by hand, with tags and a billable switch.
+• Projects with colours, clients, hourly rates and archive.
+• Reports for a day, week, month, year or any range: totals, billable time and amounts per project.
+• Export to Excel (.xlsx), LibreOffice (.ods) or CSV with real dates and numbers.
+• Import from spreadsheets, Toggl Track or Clockify exports.
+• A live clock in the notification while a timer runs, and a "still running?" nudge.
+• Home-screen timer widget with your recent projects.
+
+WHY ZERO-TRUST
+• End-to-end encrypted: everything is encrypted on your phone before it syncs. We can't read it, and neither can anyone who breaks into the server.
+• One private account for every Zero-Trust app, unlocked with your fingerprint or face.
+• Works offline and syncs across your devices when you're back online.
+• No ads, no trackers, no analytics, no data sold. Ever.
+• Open source (AGPL-3.0), so anyone can check what the app does.
+• English and Hebrew, with full right-to-left support.
+
+Part of the Zero-Trust suite: Notes, Tasks, Calendar, Contacts, Phone, Fitness, Meds, Time and Browser. One account opens them all.
+
+Privacy policy: https://zerotrust.bz/privacy/
+Support: support@zerotrust.bz
