@@ -7,6 +7,7 @@ import 'package:zero_trust_core/zero_trust_core.dart';
 import '../data/time_store.dart';
 import '../model/time_entry.dart';
 import '../notify/timer_notifier.dart';
+import '../places/place_timer.dart';
 import '../links/zt_links.dart';
 import '../ui/entry_editor_page.dart';
 import '../ui/home_page.dart';
@@ -87,6 +88,8 @@ class _AppGateState extends ConsumerState<AppGate> with WidgetsBindingObserver {
       if (user == null) {
         ref.read(vaultControllerProvider.notifier).lock();
         ref.read(timerNotifierProvider).clear().ignore();
+        // Places watched for this account stop starting timers.
+        ref.read(placeTimerProvider).clear().ignore();
         // Taps queued while locked belong to this account, not the next.
         const TimerWidget().discardPending().ignore();
         const TimerWidget().publish(const TimerWidgetState.signedOut()).ignore();
@@ -178,6 +181,10 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
     if (state == AppLifecycleState.resumed) {
       _schedule();
       _takeTrackRequest();
+      // Location may have been allowed in the phone's settings meanwhile;
+      // places already watched are left alone.
+      final rules = ref.read(placeRulesProvider).value;
+      if (rules != null && rules.isNotEmpty) ref.read(placeTimerProvider).sync(rules).ignore();
     }
   }
 
@@ -367,6 +374,11 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
     // Recent projects on the widget.
     ref.listen(projectsProvider, (_, _) => _schedule());
     ref.listen(entriesProvider, (_, _) => _schedule());
+    // Places to watch for start and stop by place (TM-3).
+    ref.listen(placeRulesProvider, (_, next) {
+      final rules = next.value;
+      if (rules != null) ref.read(placeTimerProvider).sync(rules).ignore();
+    });
     // The notification and widget texts follow a language change; the
     // debounce lets the new language load first.
     ref.listen(ztLanguageProvider, (_, _) => _schedule());

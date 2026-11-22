@@ -48,6 +48,7 @@ object RunningTimerNotification {
                         stopLabel = call.argument<String>("stop") ?: "Stop",
                         channelName = call.argument<String>("channelName") ?: "Running timer",
                         channelDescription = call.argument<String>("channelDescription") ?: "",
+                        running = call.argument<String>("running"),
                     )
                     result.success(null)
                 }
@@ -60,6 +61,28 @@ object RunningTimerNotification {
         }
     }
 
+    private const val LABELS = "zt_time_notification_labels"
+
+    /**
+     * Shows the notification without the app (a timer started by place), in
+     * the words the app last used, or English until it has shown one. The
+     * title is only "Timer running": the lock screen and the app's privacy
+     * settings are the app's to apply.
+     */
+    fun showStored(context: Context, start: Long) {
+        val labels = context.getSharedPreferences(LABELS, Context.MODE_PRIVATE)
+        show(
+            context,
+            start = start,
+            title = labels.getString("running", null) ?: "Timer running",
+            body = labels.getString("body", null) ?: "",
+            stopLabel = labels.getString("stop", null) ?: "Stop",
+            channelName = labels.getString("channelName", null) ?: "Running timer",
+            channelDescription = labels.getString("channelDescription", null) ?: "",
+            remember = false,
+        )
+    }
+
     private fun show(
         context: Context,
         start: Long,
@@ -68,7 +91,18 @@ object RunningTimerNotification {
         stopLabel: String,
         channelName: String,
         channelDescription: String,
+        running: String? = null,
+        remember: Boolean = true,
     ) {
+        if (remember) {
+            val editor = context.getSharedPreferences(LABELS, Context.MODE_PRIVATE).edit()
+                .putString("body", body)
+                .putString("stop", stopLabel)
+                .putString("channelName", channelName)
+                .putString("channelDescription", channelDescription)
+            if (running != null) editor.putString("running", running)
+            editor.apply()
+        }
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
         // Low importance: no sound, no peeking banner. Renames follow the
         // app's language; Android keeps the user's own channel settings.

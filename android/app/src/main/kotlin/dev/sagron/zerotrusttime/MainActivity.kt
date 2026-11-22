@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import dev.sagron.zerotrusttime.links.ZtLinks
 import dev.sagron.zerotrusttime.notify.RunningTimerNotification
+import dev.sagron.zerotrusttime.places.PlaceTimer
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 
@@ -25,6 +26,7 @@ class MainActivity : FlutterFragmentActivity() {
         val messenger = flutterEngine.dartExecutor.binaryMessenger
         RunningTimerNotification.register(this, messenger)
         links.register(messenger)
+        PlaceTimer.register(this, messenger)
     }
 
     override fun onNewIntent(intent: Intent) {

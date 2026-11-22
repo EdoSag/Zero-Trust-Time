@@ -311,5 +311,19 @@
         "type": "String"
       }
     }
-  }
+  },
+  "placeTimerTitle": "Start and stop by place",
+  "placeTimerSettingsBody": "Start the timer when you arrive at work, stop it when you leave",
+  "placeTimerAdd": "Add a place",
+  "placeTimerIntro": "Time can start a timer when you arrive at a place and stop it when you leave. Your phone watches the place itself; your location never leaves the phone. Works while Time is locked: the entry is saved the next time you open it.",
+  "placeTimerEmpty": "No places yet. Add your office, a client or the studio.",
+  "placeTimerUnnamed": "Unnamed place",
+  "placeTimerStarts": "starts on arrival",
+  "placeTimerStops": "stops on leaving",
+  "placeTimerNeedsLocation": "Allow location all the time",
+  "placeTimerNeedsLocationBody": "Needed to notice arriving and leaving while Time is closed. Tap to allow.",
+  "placeTimerStartOnArrive": "Start a timer when I arrive",
+  "placeTimerStartOnArriveBody": "Only when no timer is running",
+  "placeTimerStopOnLeave": "Stop it when I leave",
+  "placeTimerStopOnLeaveBody": "Only a timer this place started; one you started yourself keeps running"
 }

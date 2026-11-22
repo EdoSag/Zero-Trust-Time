@@ -8,6 +8,7 @@ import 'package:zerotrust_time/app/time_config.dart';
 import 'package:zerotrust_time/data/time_store.dart';
 import 'package:zerotrust_time/l10n/l10n.dart';
 import 'package:zerotrust_time/links/zt_links.dart';
+import 'package:zerotrust_time/model/place_rule.dart';
 import 'package:zerotrust_time/model/project.dart';
 import 'package:zerotrust_time/model/time_entry.dart';
 import 'package:zerotrust_time/notify/timer_notifier.dart';
@@ -74,6 +75,14 @@ class MemoryRepository extends TimeRepository {
     _projects.remove(id);
     _projectChanges.add(projects);
   }
+
+  final placeRules = <String, PlaceRule>{};
+
+  @override
+  Future<void> savePlaceRule(PlaceRule rule) async => placeRules[rule.id] = rule;
+
+  @override
+  Future<void> deletePlaceRule(String id) async => placeRules.remove(id);
 }
 
 late MemoryRepository repo;

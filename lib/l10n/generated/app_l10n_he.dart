@@ -513,4 +513,51 @@ class AppL10nHe extends AppL10n {
   String trackStartUntitled(String app) {
     return 'טיימר עבור $app';
   }
+
+  @override
+  String get placeTimerTitle => 'הפעלה ועצירה לפי מקום';
+
+  @override
+  String get placeTimerSettingsBody =>
+      'הטיימר מתחיל כשמגיעים לעבודה ונעצר כשיוצאים';
+
+  @override
+  String get placeTimerAdd => 'הוספת מקום';
+
+  @override
+  String get placeTimerIntro =>
+      'Time יכולה להפעיל טיימר כשמגיעים למקום ולעצור אותו כשיוצאים. הטלפון עצמו עוקב אחרי המקום, והמיקום שלך לא יוצא מהטלפון. עובד גם כש-Time נעולה: הרישום נשמר בפעם הבאה שפותחים אותה.';
+
+  @override
+  String get placeTimerEmpty =>
+      'עדיין אין מקומות. אפשר להוסיף את המשרד, לקוח או הסטודיו.';
+
+  @override
+  String get placeTimerUnnamed => 'מקום בלי שם';
+
+  @override
+  String get placeTimerStarts => 'מתחיל בהגעה';
+
+  @override
+  String get placeTimerStops => 'נעצר ביציאה';
+
+  @override
+  String get placeTimerNeedsLocation => 'צריך לאפשר מיקום כל הזמן';
+
+  @override
+  String get placeTimerNeedsLocationBody =>
+      'כדי לזהות הגעה ויציאה גם כש-Time סגורה. אפשר להקיש כדי לאפשר.';
+
+  @override
+  String get placeTimerStartOnArrive => 'להפעיל טיימר כשאני מגיע';
+
+  @override
+  String get placeTimerStartOnArriveBody => 'רק אם אין טיימר פעיל';
+
+  @override
+  String get placeTimerStopOnLeave => 'לעצור אותו כשאני יוצא';
+
+  @override
+  String get placeTimerStopOnLeaveBody =>
+      'רק טיימר שהמקום הפעיל; טיימר שהפעלת בעצמך ממשיך';
 }

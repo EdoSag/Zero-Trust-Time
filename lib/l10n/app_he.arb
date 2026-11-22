@@ -145,5 +145,19 @@
   "linkedAppMissing": "{app} לא מותקנת",
   "trackStartQuestion": "להפעיל טיימר?",
   "trackStartBody": "\"{title}\" מתוך {app}",
-  "trackStartUntitled": "טיימר עבור {app}"
+  "trackStartUntitled": "טיימר עבור {app}",
+  "placeTimerTitle": "הפעלה ועצירה לפי מקום",
+  "placeTimerSettingsBody": "הטיימר מתחיל כשמגיעים לעבודה ונעצר כשיוצאים",
+  "placeTimerAdd": "הוספת מקום",
+  "placeTimerIntro": "Time יכולה להפעיל טיימר כשמגיעים למקום ולעצור אותו כשיוצאים. הטלפון עצמו עוקב אחרי המקום, והמיקום שלך לא יוצא מהטלפון. עובד גם כש-Time נעולה: הרישום נשמר בפעם הבאה שפותחים אותה.",
+  "placeTimerEmpty": "עדיין אין מקומות. אפשר להוסיף את המשרד, לקוח או הסטודיו.",
+  "placeTimerUnnamed": "מקום בלי שם",
+  "placeTimerStarts": "מתחיל בהגעה",
+  "placeTimerStops": "נעצר ביציאה",
+  "placeTimerNeedsLocation": "צריך לאפשר מיקום כל הזמן",
+  "placeTimerNeedsLocationBody": "כדי לזהות הגעה ויציאה גם כש-Time סגורה. אפשר להקיש כדי לאפשר.",
+  "placeTimerStartOnArrive": "להפעיל טיימר כשאני מגיע",
+  "placeTimerStartOnArriveBody": "רק אם אין טיימר פעיל",
+  "placeTimerStopOnLeave": "לעצור אותו כשאני יוצא",
+  "placeTimerStopOnLeaveBody": "רק טיימר שהמקום הפעיל; טיימר שהפעלת בעצמך ממשיך"
 }
