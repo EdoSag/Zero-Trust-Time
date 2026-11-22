@@ -219,6 +219,7 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
             ),
           ),
         );
+        await _publishNow();
         await links.finishTrack(saved: saved == true);
         return;
       }
@@ -239,13 +240,14 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
         ),
       );
       if (start == true) {
-        await repo.start(
+        final started = await repo.start(
           description: request.title,
           projectId: before?.projectId,
           tags: before?.tags ?? const [],
           billable: before?.billable ?? false,
           link: link,
         );
+        await _publishNow(running: started.id);
       }
       await links.finishTrack(saved: start == true);
     } on Object catch (e) {
@@ -253,6 +255,19 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
     } finally {
       _tracking = false;
     }
+  }
+
+  /// Shows the notification and the widget right away instead of after the
+  /// usual short wait: going back to the other app may close Time first.
+  /// Waits up to a second for the timer [running] to show up.
+  Future<void> _publishNow({String? running}) async {
+    for (var i = 0; running != null && i < 20; i++) {
+      if (ref.read(runningProvider).any((e) => e.id == running)) break;
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      if (!mounted) return;
+    }
+    _debounce?.cancel();
+    await _apply();
   }
 
   /// Starts and stops tapped on the widget, at the time they were tapped.
