@@ -4,6 +4,8 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../team/join_links.dart';
+
 /// Where the links in account emails lead. Both addresses must be allowed in
 /// Supabase (Authentication > URL Configuration > Redirect URLs:
 /// https://zerotrust.bz/auth/**), or Supabase sends people to the Site URL.
@@ -43,6 +45,11 @@ abstract final class EmailLinks {
   }
 
   static Future<void> _handle(Uri uri) async {
+    // A team invite (Business mode): shown once the app is unlocked.
+    if (JoinLinks.isInvite(uri)) {
+      JoinLinks.pending.value = uri.toString();
+      return;
+    }
     if (uri.host != 'zerotrust.bz' || !uri.path.startsWith('/auth/')) return;
     // The token is after the # so it never reaches a web server.
     final params = Uri.splitQueryString(uri.fragment);

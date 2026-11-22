@@ -1056,6 +1056,144 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Only a timer this place started; one you started yourself keeps running'**
   String get placeTimerStopOnLeaveBody;
+
+  /// No description provided for @workspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get workspaces;
+
+  /// No description provided for @workspaceMine.
+  ///
+  /// In en, this message translates to:
+  /// **'My time'**
+  String get workspaceMine;
+
+  /// No description provided for @workspaceMineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you see it'**
+  String get workspaceMineBody;
+
+  /// No description provided for @teamUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get teamUnnamed;
+
+  /// No description provided for @teamOwnerCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner · {count, plural, =1{1 person} other{{count} people}}'**
+  String teamOwnerCount(int count);
+
+  /// No description provided for @teamMemberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 person} other{{count} people}}'**
+  String teamMemberCount(int count);
+
+  /// No description provided for @teamWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for an owner to let you in'**
+  String get teamWaiting;
+
+  /// No description provided for @teamManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Members and invites'**
+  String get teamManage;
+
+  /// No description provided for @teamJoinRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wants to join {team}'**
+  String teamJoinRequest(String name, String team);
+
+  /// No description provided for @teamJoinRequestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare the code on their phone, then let them in'**
+  String get teamJoinRequestBody;
+
+  /// No description provided for @teamCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'New team'**
+  String get teamCreate;
+
+  /// No description provided for @teamCreateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Track time together: shared projects and reports'**
+  String get teamCreateBody;
+
+  /// No description provided for @teamCreateExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone you invite tracks time on the team\'s projects, and everyone sees the team\'s reports. Only owners change projects and rates. All of it is end-to-end encrypted.'**
+  String get teamCreateExplain;
+
+  /// No description provided for @teamCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get teamCreateAction;
+
+  /// No description provided for @teamName.
+  ///
+  /// In en, this message translates to:
+  /// **'Team name'**
+  String get teamName;
+
+  /// No description provided for @teamNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example Acme Studio'**
+  String get teamNameHint;
+
+  /// No description provided for @teamYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name in the team'**
+  String get teamYourName;
+
+  /// No description provided for @teamJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a team'**
+  String get teamJoin;
+
+  /// No description provided for @teamPageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Members track time on the team\'s projects and see the team\'s reports. Owners add projects and rates and let people in.'**
+  String get teamPageBody;
+
+  /// No description provided for @teamNeedsInternet.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating a team needs the internet. Try again when you\'re online.'**
+  String get teamNeedsInternet;
+
+  /// No description provided for @byMember.
+  ///
+  /// In en, this message translates to:
+  /// **'By member'**
+  String get byMember;
+
+  /// No description provided for @memberYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get memberYou;
+
+  /// No description provided for @memberFormer.
+  ///
+  /// In en, this message translates to:
+  /// **'Former member'**
+  String get memberFormer;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

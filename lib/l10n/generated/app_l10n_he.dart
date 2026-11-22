@@ -560,4 +560,94 @@ class AppL10nHe extends AppL10n {
   @override
   String get placeTimerStopOnLeaveBody =>
       'רק טיימר שהמקום הפעיל; טיימר שהפעלת בעצמך ממשיך';
+
+  @override
+  String get workspaces => 'צוותים';
+
+  @override
+  String get workspaceMine => 'הזמן שלי';
+
+  @override
+  String get workspaceMineBody => 'רק את/ה רואה אותו';
+
+  @override
+  String get teamUnnamed => 'צוות';
+
+  @override
+  String teamOwnerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count אנשים',
+      one: 'אדם אחד',
+    );
+    return 'בעלים · $_temp0';
+  }
+
+  @override
+  String teamMemberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count אנשים',
+      one: 'אדם אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamWaiting => 'ממתין שבעלים יאשרו את הכניסה';
+
+  @override
+  String get teamManage => 'חברים והזמנות';
+
+  @override
+  String teamJoinRequest(String name, String team) {
+    return '$name רוצה להצטרף ל$team';
+  }
+
+  @override
+  String get teamJoinRequestBody => 'משווים את הקוד בטלפון שלהם ואז מאשרים';
+
+  @override
+  String get teamCreate => 'צוות חדש';
+
+  @override
+  String get teamCreateBody => 'מודדים זמן יחד: פרויקטים ודוחות משותפים';
+
+  @override
+  String get teamCreateExplain =>
+      'כל מי שמוזמן מודד זמן על הפרויקטים של הצוות, וכולם רואים את הדוחות של הצוות. רק בעלים משנים פרויקטים ותעריפים. הכול מוצפן מקצה לקצה.';
+
+  @override
+  String get teamCreateAction => 'יצירה';
+
+  @override
+  String get teamName => 'שם הצוות';
+
+  @override
+  String get teamNameHint => 'למשל סטודיו אקמה';
+
+  @override
+  String get teamYourName => 'השם שלך בצוות';
+
+  @override
+  String get teamJoin => 'הצטרפות לצוות';
+
+  @override
+  String get teamPageBody =>
+      'חברי הצוות מודדים זמן על הפרויקטים של הצוות ורואים את הדוחות שלו. בעלים מוסיפים פרויקטים ותעריפים ומאשרים כניסה.';
+
+  @override
+  String get teamNeedsInternet =>
+      'כדי ליצור צוות צריך חיבור לאינטרנט. אפשר לנסות שוב כשיש חיבור.';
+
+  @override
+  String get byMember => 'לפי חבר צוות';
+
+  @override
+  String get memberYou => 'את/ה';
+
+  @override
+  String get memberFormer => 'חבר צוות לשעבר';
 }

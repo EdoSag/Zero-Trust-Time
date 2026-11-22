@@ -29,9 +29,14 @@ class Project {
     this.hourlyRate,
     this.billable = false,
     this.archived = false,
+    this.space,
   });
 
   final String id;
+
+  /// The team (shared space) the project belongs to; null for the account's
+  /// own projects. Not stored: it is where the project was read from.
+  final String? space;
   final String name;
   final String client;
   final int color;
@@ -54,8 +59,10 @@ class Project {
     Object? hourlyRate = _unset,
     bool? billable,
     bool? archived,
+    Object? space = _unset,
   }) => Project(
     id: id,
+    space: identical(space, _unset) ? this.space : space as String?,
     name: name ?? this.name,
     client: client ?? this.client,
     color: color ?? this.color,

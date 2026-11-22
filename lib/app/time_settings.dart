@@ -13,7 +13,12 @@ class TimeSettings {
     this.notificationText = false,
     this.nudgeAfterHours = 8,
     this.widgetDetails = false,
+    this.teamId,
   });
+
+  /// The team whose time the tabs show and new time goes to (Business
+  /// mode), or null for the account's own time.
+  final String? teamId;
 
   /// [DateTime.monday] .. [DateTime.sunday], or null for the locale's.
   final int? weekStart;
@@ -49,7 +54,9 @@ class TimeSettings {
     bool? notificationText,
     Object? nudgeAfterHours = _unset,
     bool? widgetDetails,
+    Object? teamId = _unset,
   }) => TimeSettings(
+    teamId: identical(teamId, _unset) ? this.teamId : teamId as String?,
     weekStart: identical(weekStart, _unset) ? this.weekStart : weekStart as int?,
     currency: currency ?? this.currency,
     decimalHours: decimalHours ?? this.decimalHours,
@@ -69,6 +76,7 @@ class TimeSettings {
     'notificationText': '$notificationText',
     'nudgeAfterHours': '${nudgeAfterHours ?? 'never'}',
     'widgetDetails': '$widgetDetails',
+    'team': teamId ?? '',
   };
 
   static TimeSettings fromPrefs(Map<String, String?> p) {
@@ -84,6 +92,7 @@ class TimeSettings {
           ? d.nudgeAfterHours
           : int.tryParse(p['nudgeAfterHours']!),
       widgetDetails: b('widgetDetails', d.widgetDetails),
+      teamId: (p['team'] ?? '').isEmpty ? null : p['team'],
     );
   }
 }

@@ -9,6 +9,9 @@ import '../model/time_entry.dart';
 import '../notify/timer_notifier.dart';
 import '../places/place_timer.dart';
 import '../links/zt_links.dart';
+import '../team/join_links.dart';
+import '../team/team.dart';
+import '../ui/team_pages.dart';
 import '../ui/entry_editor_page.dart';
 import '../ui/home_page.dart';
 import '../widget/timer_widget.dart';
@@ -165,12 +168,23 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _schedule();
       _takeTrackRequest();
+      _openInvite();
     });
+    JoinLinks.pending.addListener(_openInvite);
+  }
+
+  /// A team invite link opened on this phone: the join screen, once.
+  void _openInvite() {
+    final link = JoinLinks.pending.value;
+    if (link == null || !mounted) return;
+    JoinLinks.pending.value = null;
+    joinTeam(context, link: link);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    JoinLinks.pending.removeListener(_openInvite);
     _debounce?.cancel();
     super.dispose();
   }
@@ -212,6 +226,7 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
             builder: (_) => EntryEditorPage(
               draft: TimeEntry(
                 id: TimeRepository.newId(),
+                space: ref.read(workspaceProvider),
                 description: request.title,
                 projectId: before?.projectId,
                 tags: before?.tags ?? const [],
@@ -282,7 +297,8 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
     final lines = await widget.pendingLines();
     if (lines.isEmpty) return;
     final repo = ref.read(timeRepositoryProvider);
-    final projects = {for (final p in await repo.allProjects()) p.id: p};
+    // Started on the widget or by place: in the workspace on screen.
+    final projects = {for (final p in await repo.currentProjects()) p.id: p};
     for (final line in lines) {
       for (final t in WidgetTimerAction.parse(line)) {
         if (t.stop) {
@@ -299,14 +315,17 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
   /// A start saved just before the app was closed, and not yet taken off the
   /// queue, is not started a second time.
   bool _alreadyStarted(DateTime at) =>
-      ref.read(entriesProvider).value?.any((e) => e.running && e.start == at) ?? false;
+      ref.read(runningProvider).any((e) => e.start == at);
 
   Future<void> _publishWidget() async {
-    final entries = ref.read(entriesProvider).value;
+    final mine = ref.read(myEntriesProvider).value;
     final projects = ref.read(projectsProvider).value;
-    if (entries == null || projects == null) return;
+    if (mine == null || projects == null) return;
+    // A timer running in another workspace (a team, or the account's own
+    // time) shows too.
+    final running = ref.read(runningProvider);
     final next = TimerWidgetState.from(
-      entries: entries,
+      entries: [...running, for (final e in mine) if (!e.running) e],
       projects: projects,
       details: ref.read(timeSettingsProvider).widgetDetails,
     );

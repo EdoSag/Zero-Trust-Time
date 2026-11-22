@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:zero_trust_core/zero_trust_core.dart';
 
 import '../data/time_store.dart';
+import '../team/team.dart';
 import '../model/time_entry.dart';
 import '../util/format.dart';
 import 'project_widgets.dart';
@@ -128,8 +129,10 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
       setState(() => _error = context.l10n.runningInFuture);
       return;
     }
+    final space = _initial?.space ?? ref.read(workspaceProvider);
     final entry = TimeEntry(
-      id: widget.entry?.id ?? TimeRepository.newId(),
+      id: widget.entry?.id ?? ref.read(timeRepositoryProvider).newEntryId(space),
+      space: space,
       description: _description.text.trim(),
       projectId: _projectId,
       tags: {
@@ -161,7 +164,7 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
       ),
     );
     if (ok != true) return;
-    await ref.read(timeRepositoryProvider).deleteEntry(widget.entry!.id);
+    await ref.read(timeRepositoryProvider).deleteEntry(widget.entry!.id, space: widget.entry!.space);
     if (mounted) Navigator.of(context).pop();
   }
 

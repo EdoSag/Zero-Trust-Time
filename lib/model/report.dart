@@ -141,3 +141,30 @@ List<(DateTime, List<TimeEntry>)> groupByDay(Iterable<TimeEntry> entries) {
       (d, map[d]!..sort((a, b) => b.start.compareTo(a.start))),
   ];
 }
+
+/// One person's time in a team report (Business mode).
+@immutable
+class MemberTotal {
+  const MemberTotal({required this.userId, required this.total, required this.billable});
+
+  /// Who logged it; null for entries not logged in anyone's name.
+  final String? userId;
+  final Duration total;
+  final Duration billable;
+}
+
+/// Time per member in [entries] (a report's entries), most first.
+List<MemberTotal> totalsByMember(List<TimeEntry> entries, DateTime now) {
+  final total = <String?, Duration>{};
+  final billable = <String?, Duration>{};
+  for (final e in entries) {
+    final who = e.ownerId;
+    final d = e.durationAt(now);
+    total[who] = (total[who] ?? Duration.zero) + d;
+    if (e.billable) billable[who] = (billable[who] ?? Duration.zero) + d;
+  }
+  return [
+    for (final who in total.keys)
+      MemberTotal(userId: who, total: total[who]!, billable: billable[who] ?? Duration.zero),
+  ]..sort((a, b) => b.total.compareTo(a.total));
+}
