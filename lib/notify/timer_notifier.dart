@@ -113,6 +113,8 @@ class LocalTimerNotifier implements TimerNotifier {
         'stop': l.stop,
         'channelName': l.channelRunning,
         'channelDescription': l.channelRunningBody,
+        // For a timer started by place while the app is closed.
+        'running': l.timerRunning,
       });
     }
     await _plugin.cancel(id: _nudgeId);

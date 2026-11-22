@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:zero_trust_core/zero_trust_core.dart';
 
+import '../model/place_rule.dart';
 import '../model/project.dart';
 import '../model/time_entry.dart';
 
@@ -30,6 +31,28 @@ final projectsCollection = ZtCollection<Project>(
   toJson: (p) => p.toJson(),
   idOf: (p) => p.id,
 );
+
+/// Start and stop by place (TM-3), kind `placeRule`.
+final placeRulesCollection = ZtCollection<PlaceRule?>(
+  kind: 'placeRule',
+  version: 1,
+  fromJson: (id, json, _) => PlaceRule.fromJson(id, json),
+  toJson: (r) => r!.toJson(),
+  idOf: (r) => r!.id,
+);
+
+/// Every place rule, by place name.
+final placeRulesProvider = StreamProvider<List<PlaceRule>>((ref) async* {
+  final store = await ref.watch(ztLocalStoreProvider.future);
+  List<PlaceRule> sorted(List<PlaceRule?> list) => [
+    for (final r in list) ?r,
+  ]..sort((a, b) => a.place.name.toLowerCase().compareTo(b.place.name.toLowerCase()));
+  if (store is ZtLocalStore) {
+    yield* placeRulesCollection.watch(store).map(sorted);
+  } else {
+    yield sorted(await placeRulesCollection.list(store));
+  }
+});
 
 /// Every entry in the account, newest first.
 final entriesProvider = StreamProvider<List<TimeEntry>>((ref) async* {
@@ -166,6 +189,12 @@ class TimeRepository {
     }
     return best;
   }
+
+  Future<void> savePlaceRule(PlaceRule rule) async {
+    await placeRulesCollection.save(_sync, await _store, rule);
+  }
+
+  Future<void> deletePlaceRule(String id) => placeRulesCollection.delete(_sync, id);
 
   /// Deletes a project. Its entries stay, shown as "No project".
   Future<void> deleteProject(String id) => projectsCollection.delete(_sync, id);

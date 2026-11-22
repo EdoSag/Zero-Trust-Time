@@ -6,6 +6,12 @@
          kept across a reboot. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Start and stop by place (TM-3), only once the user sets up a place:
+         the phone itself watches it, the location never leaves the phone.
+         (zt_places declares the same.) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
 
     <application
         android:supportsRtl="true"
@@ -69,6 +75,19 @@
         <receiver
             android:name=".widget.TimerWidgetTapReceiver"
             android:exported="false" />
+        <!-- Start and stop by place (TM-3, PlaceTimer.kt): Android's own
+             proximity alerts, set again after a reboot or an update. -->
+        <receiver
+            android:name=".places.PlaceTimerReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".places.PlaceTimerBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+        </receiver>
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>

@@ -514,4 +514,51 @@ class AppL10nEn extends AppL10n {
   String trackStartUntitled(String app) {
     return 'A timer for $app';
   }
+
+  @override
+  String get placeTimerTitle => 'Start and stop by place';
+
+  @override
+  String get placeTimerSettingsBody =>
+      'Start the timer when you arrive at work, stop it when you leave';
+
+  @override
+  String get placeTimerAdd => 'Add a place';
+
+  @override
+  String get placeTimerIntro =>
+      'Time can start a timer when you arrive at a place and stop it when you leave. Your phone watches the place itself; your location never leaves the phone. Works while Time is locked: the entry is saved the next time you open it.';
+
+  @override
+  String get placeTimerEmpty =>
+      'No places yet. Add your office, a client or the studio.';
+
+  @override
+  String get placeTimerUnnamed => 'Unnamed place';
+
+  @override
+  String get placeTimerStarts => 'starts on arrival';
+
+  @override
+  String get placeTimerStops => 'stops on leaving';
+
+  @override
+  String get placeTimerNeedsLocation => 'Allow location all the time';
+
+  @override
+  String get placeTimerNeedsLocationBody =>
+      'Needed to notice arriving and leaving while Time is closed. Tap to allow.';
+
+  @override
+  String get placeTimerStartOnArrive => 'Start a timer when I arrive';
+
+  @override
+  String get placeTimerStartOnArriveBody => 'Only when no timer is running';
+
+  @override
+  String get placeTimerStopOnLeave => 'Stop it when I leave';
+
+  @override
+  String get placeTimerStopOnLeaveBody =>
+      'Only a timer this place started; one you started yourself keeps running';
 }

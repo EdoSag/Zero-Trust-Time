@@ -25,6 +25,13 @@ dependencies:
       url: https://github.com/EdoSag/Zero-Trust-Core.git
       path: packages/zero_trust_core
       ref: 08eccf33e5989c0efceba67d351159b979ae0740
+  # Place picker and location permissions for start and stop by place
+  # (TM-3). Same repository and commit as zero_trust_core.
+  zt_places:
+    git:
+      url: https://github.com/EdoSag/Zero-Trust-Core.git
+      path: packages/zt_places
+      ref: 08eccf33e5989c0efceba67d351159b979ae0740
   flutter_riverpod: ^3.5.0
   supabase_flutter: ^2.9.0
   # Reset links from account emails (EmailLinks).
