@@ -11,9 +11,27 @@ import '../team/team.dart';
 Future<void> switchWorkspace(WidgetRef ref, String? spaceId) =>
     ref.read(timeSettingsProvider.notifier).update((s) => s.copyWith(teamId: spaceId));
 
+enum _SheetAction { create, join }
+
 /// Business mode's switcher: the account's own time, each team, people
 /// waiting to join a team this account owns, and new or join a team.
-Future<void> showWorkspaceSheet(BuildContext context) => showModalBottomSheet<void>(
+///
+/// New and join run after the sheet has closed, with the page's [context]
+/// and [ref]: the sheet's own are gone by then.
+Future<void> showWorkspaceSheet(BuildContext context, WidgetRef ref) async {
+  final action = await _workspaceSheet(context);
+  if (!context.mounted) return;
+  switch (action) {
+    case _SheetAction.create:
+      await createTeam(context, ref);
+    case _SheetAction.join:
+      await joinTeam(context);
+    case null:
+      break;
+  }
+}
+
+Future<_SheetAction?> _workspaceSheet(BuildContext context) => showModalBottomSheet<_SheetAction>(
   context: context,
   showDragHandle: true,
   isScrollControlled: true,
@@ -82,19 +100,13 @@ Future<void> showWorkspaceSheet(BuildContext context) => showModalBottomSheet<vo
                 title: Text(l.teamCreate),
                 subtitle: Text(l.teamCreateBody),
                 enabled: ready,
-                onTap: () async {
-                  Navigator.of(sheet).pop();
-                  await createTeam(context, ref);
-                },
+                onTap: () => Navigator.of(sheet).pop(_SheetAction.create),
               ),
               ListTile(
                 leading: const Icon(Icons.login),
                 title: Text(l.teamJoin),
                 enabled: ready,
-                onTap: () async {
-                  Navigator.of(sheet).pop();
-                  await joinTeam(context);
-                },
+                onTap: () => Navigator.of(sheet).pop(_SheetAction.join),
               ),
             ],
           ),

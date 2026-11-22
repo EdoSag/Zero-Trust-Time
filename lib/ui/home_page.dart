@@ -33,7 +33,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           IconButton(
             tooltip: l.workspaces,
             icon: Icon(ref.watch(workspaceProvider) == null ? Icons.groups_outlined : Icons.groups),
-            onPressed: () => showWorkspaceSheet(context),
+            onPressed: () => showWorkspaceSheet(context, ref),
           ),
           IconButton(
             tooltip: l.settingsTooltip,
