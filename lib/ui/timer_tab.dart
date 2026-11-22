@@ -84,7 +84,8 @@ class _TimerTabState extends ConsumerState<TimerTab> {
 
   @override
   Widget build(BuildContext context) {
-    final entries = ref.watch(entriesProvider);
+    // In a team, only this account's own time; Reports show everyone's.
+    final entries = ref.watch(myEntriesProvider);
     final projects = {
       for (final p in ref.watch(projectsProvider).value ?? const <Project>[]) p.id: p,
     };
@@ -346,7 +347,7 @@ class _EntryTile extends ConsumerWidget {
       onDismissed: (_) async {
         final messenger = ScaffoldMessenger.of(context);
         final l = context.l10n;
-        await repo.deleteEntry(entry.id);
+        await repo.deleteEntry(entry.id, space: entry.space);
         messenger
           ..clearSnackBars()
           ..showSnackBar(

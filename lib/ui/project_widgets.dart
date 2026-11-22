@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/time_store.dart';
+import '../team/team.dart';
 import '../model/project.dart';
 import 'project_editor_page.dart';
 import '../l10n/l10n.dart';
@@ -93,6 +94,7 @@ Future<PickedProject?> pickProject(BuildContext context, {String? selected}) {
                     selected: p.id == selected,
                     onTap: () => Navigator.of(sheet).pop(PickedProject(p)),
                   ),
+                if (ref.watch(canEditProjectsProvider))
                 ListTile(
                   leading: const Icon(Icons.add),
                   title: Text(context.l10n.newProject),

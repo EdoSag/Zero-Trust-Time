@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../app/time_settings.dart';
 import '../data/time_store.dart';
+import '../team/team.dart';
 import '../model/project.dart';
 import '../model/report.dart';
 import '../util/format.dart';
@@ -112,6 +113,8 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
     final entries = ref.watch(entriesProvider).value;
     final projects = ref.watch(projectsProvider).value ?? const <Project>[];
     if (entries == null) return const Center(child: CircularProgressIndicator());
+    final team = ref.watch(currentTeamProvider);
+    final me = team == null ? null : ref.watch(myUserIdProvider);
 
     final weekStart = settings.weekStart ?? localeWeekStart(context);
     final (from, to) = _range(weekStart);
@@ -233,6 +236,33 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
                 decimal: decimal,
                 currency: settings.currency,
               ),
+          // Business mode: who spent the time.
+          if (team != null && report.entries.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: Text(context.l10n.byMember, style: theme.textTheme.titleMedium),
+            ),
+            for (final m in totalsByMember(report.entries, now))
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                leading: CircleAvatar(
+                  child: Text(_initial(team.memberName(m.userId), context)),
+                ),
+                title: Text(
+                  m.userId == me
+                      ? context.l10n.memberYou
+                      : (team.memberName(m.userId).isEmpty ? context.l10n.memberFormer : team.memberName(m.userId)),
+                ),
+                subtitle: m.billable == Duration.zero
+                    ? null
+                    : Text('${context.l10n.billable}: ${formatDuration(m.billable, decimal: decimal)}'),
+                trailing: Text(
+                  formatDuration(m.total, decimal: decimal),
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+          ],
         ],
       );
     }
@@ -428,4 +458,9 @@ class _ProjectRow extends StatelessWidget {
       ),
     );
   }
+}
+
+String _initial(String name, BuildContext context) {
+  final t = name.trim();
+  return t.isEmpty ? '?' : t.characters.first.toUpperCase();
 }

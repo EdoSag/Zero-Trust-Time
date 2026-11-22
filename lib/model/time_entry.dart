@@ -49,7 +49,24 @@ class TimeEntry {
     this.link,
     this.createdAt,
     this.updatedAt,
+    this.space,
   });
+
+  /// Entry ids in a team are `entry/<user id>/<uuid>`: only that member may
+  /// change them (the team's space policy).
+  static const teamPrefix = 'entry/';
+
+  /// The team (shared space) the entry is in; null for the account's own.
+  /// Not stored: it is where the entry was read from.
+  final String? space;
+
+  /// Who logged a team entry; null for the account's own entries.
+  String? get ownerId {
+    if (!id.startsWith(teamPrefix)) return null;
+    final rest = id.substring(teamPrefix.length);
+    final slash = rest.indexOf('/');
+    return slash <= 0 ? null : rest.substring(0, slash);
+  }
 
   final String id;
   final String description;
@@ -91,7 +108,9 @@ class TimeEntry {
     bool? billable,
     Object? link = _unset,
     DateTime? createdAt,
+    Object? space = _unset,
   }) => TimeEntry(
+    space: identical(space, _unset) ? this.space : space as String?,
     id: id ?? this.id,
     description: description ?? this.description,
     projectId: identical(projectId, _unset) ? this.projectId : projectId as String?,

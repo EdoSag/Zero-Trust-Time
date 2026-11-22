@@ -12,6 +12,7 @@ import 'package:zerotrust_time/model/place_rule.dart';
 import 'package:zerotrust_time/model/project.dart';
 import 'package:zerotrust_time/model/time_entry.dart';
 import 'package:zerotrust_time/notify/timer_notifier.dart';
+import 'package:zerotrust_time/team/team.dart';
 import 'package:zerotrust_time/ui/entry_editor_page.dart';
 import 'package:zerotrust_time/ui/home_page.dart';
 
@@ -53,7 +54,7 @@ class MemoryRepository extends TimeRepository {
   }
 
   @override
-  Future<void> deleteEntry(String id) async {
+  Future<void> deleteEntry(String id, {String? space}) async {
     _entries.remove(id);
     _entryChanges.add(entries);
   }
@@ -71,7 +72,7 @@ class MemoryRepository extends TimeRepository {
   }
 
   @override
-  Future<void> deleteProject(String id) async {
+  Future<void> deleteProject(String id, {String? space}) async {
     _projects.remove(id);
     _projectChanges.add(projects);
   }
@@ -93,10 +94,15 @@ Widget app(
   List<Project> projects = const [],
   Locale locale = ZtLanguages.english,
   ZtLinks links = const NoZtLinks(),
+  List<Team> teams = const [],
+  String? workspace,
 }) {
   return ProviderScope(
     overrides: [
       ztLinksProvider.overrideWithValue(links),
+      teamsProvider.overrideWith((ref) async => teams),
+      if (workspace != null) workspaceProvider.overrideWithValue(workspace),
+      myUserIdProvider.overrideWithValue('me'),
       ztAppConfigProvider.overrideWithValue(timeAppConfig),
       ztPreferencesStoreProvider.overrideWithValue(InMemoryPreferencesStore()),
       timerNotifierProvider.overrideWithValue(NoopTimerNotifier()),
