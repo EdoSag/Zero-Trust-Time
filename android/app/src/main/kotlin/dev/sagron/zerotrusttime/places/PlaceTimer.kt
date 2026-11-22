@@ -32,8 +32,9 @@ import org.json.JSONObject
  * radius, the project id, and whether to start and stop. No names.
  *
  * - Arriving starts a timer only when none is running.
- * - Leaving stops only a timer that this feature started, and only while
- *   it still runs; a timer started or switched by hand is left alone.
+ * - Leaving stops only a timer that this place started, and only while
+ *   it still runs; a timer started or switched by hand, or by another
+ *   place, is left alone.
  * - An "arrive" right after the places were set up means the phone was
  *   already there, and is ignored, as in zt_places.
  */
@@ -102,7 +103,7 @@ object PlaceTimer {
         val same = array.toString() == (prefs(c).getString("rules", null) ?: "[]")
         if (same && prefs(c).getBoolean("watching", false)) return array.length()
         val editor = prefs(c).edit().putString("rules", array.toString())
-        if (array.length() == 0) editor.remove("placeStarted")
+        if (array.length() == 0) editor.remove("placeStarted").remove("placeStartedBy")
         editor.apply()
         old.forEach { unwatch(c, it) }
         return watchAll(c)
@@ -171,14 +172,17 @@ object PlaceTimer {
             if (!settled || running) return
             val projectId = rule.optString("projectId").ifEmpty { null }
             val at = TimerWidgetProvider().tap(c, start = true, projectId = projectId) ?: return
-            places.edit().putLong("placeStarted", at).apply()
+            places.edit().putLong("placeStarted", at).putString("placeStartedBy", id).apply()
             RunningTimerNotification.showStored(c, at)
         } else {
             if (!rule.optBoolean("stop")) return
+            // Only the place that started the timer stops it: leaving
+            // another place that overlaps it leaves the timer running.
             val started = places.getLong("placeStarted", 0)
+            if (places.getString("placeStartedBy", null) != id) return
             if (!running || started == 0L || runningSince != started) return
             TimerWidgetProvider().tap(c, start = false, projectId = null)
-            places.edit().remove("placeStarted").apply()
+            places.edit().remove("placeStarted").remove("placeStartedBy").apply()
         }
     }
 }

@@ -181,6 +181,10 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
     if (state == AppLifecycleState.resumed) {
       _schedule();
       _takeTrackRequest();
+      // Location may have been allowed in the phone's settings meanwhile;
+      // places already watched are left alone.
+      final rules = ref.read(placeRulesProvider).value;
+      if (rules != null && rules.isNotEmpty) ref.read(placeTimerProvider).sync(rules).ignore();
     }
   }
 
