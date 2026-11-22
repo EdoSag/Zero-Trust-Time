@@ -108,6 +108,7 @@ class TimeRepository {
     String? projectId,
     List<String> tags = const [],
     bool billable = false,
+    EntryLink? link,
     DateTime? at,
   }) => _inTurn(() async {
     final now = at ?? DateTime.now();
@@ -118,6 +119,7 @@ class TimeRepository {
       projectId: projectId,
       tags: tags,
       billable: billable,
+      link: link,
       start: now,
     );
     await saveEntry(entry);
@@ -130,6 +132,7 @@ class TimeRepository {
     projectId: e.projectId,
     tags: e.tags,
     billable: e.billable,
+    link: e.link,
   );
 
   Future<void> stop(TimeEntry entry, {DateTime? at}) =>
@@ -150,6 +153,18 @@ class TimeRepository {
 
   Future<void> saveProject(Project project) async {
     await projectsCollection.save(_sync, await _store, project);
+  }
+
+  /// The newest entry linked to the same task or event, so time started
+  /// from it again lands in the same project with the same tags.
+  Future<TimeEntry?> lastLinkedTo(EntryLink link) async {
+    TimeEntry? best;
+    for (final e in await allEntries()) {
+      final l = e.link;
+      if (l == null || l.app != link.app || l.id != link.id) continue;
+      if (best == null || e.start.isAfter(best.start)) best = e;
+    }
+    return best;
   }
 
   /// Deletes a project. Its entries stay, shown as "No project".

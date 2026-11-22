@@ -930,6 +930,48 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Start a timer for {project}'**
   String widgetStartTimerFor(String project);
+
+  /// No description provided for @linkedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to {app}'**
+  String linkedTo(String app);
+
+  /// No description provided for @pickFromApp.
+  ///
+  /// In en, this message translates to:
+  /// **'From {app}'**
+  String pickFromApp(String app);
+
+  /// No description provided for @removeLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove link'**
+  String get removeLink;
+
+  /// No description provided for @linkedAppMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{app} isn\'t installed'**
+  String linkedAppMissing(String app);
+
+  /// No description provided for @trackStartQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a timer?'**
+  String get trackStartQuestion;
+
+  /// No description provided for @trackStartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" from {app}'**
+  String trackStartBody(String title, String app);
+
+  /// No description provided for @trackStartUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'A timer for {app}'**
+  String trackStartUntitled(String app);
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

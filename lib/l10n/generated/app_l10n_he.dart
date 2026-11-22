@@ -482,4 +482,35 @@ class AppL10nHe extends AppL10n {
   String widgetStartTimerFor(String project) {
     return 'הפעלת טיימר עבור $project';
   }
+
+  @override
+  String linkedTo(String app) {
+    return 'מקושר ל-$app';
+  }
+
+  @override
+  String pickFromApp(String app) {
+    return 'מתוך $app';
+  }
+
+  @override
+  String get removeLink => 'הסרת הקישור';
+
+  @override
+  String linkedAppMissing(String app) {
+    return '$app לא מותקנת';
+  }
+
+  @override
+  String get trackStartQuestion => 'להפעיל טיימר?';
+
+  @override
+  String trackStartBody(String title, String app) {
+    return '\"$title\" מתוך $app';
+  }
+
+  @override
+  String trackStartUntitled(String app) {
+    return 'טיימר עבור $app';
+  }
 }

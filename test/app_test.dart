@@ -7,6 +7,7 @@ import 'package:zero_trust_core/zero_trust_core.dart';
 import 'package:zerotrust_time/app/time_config.dart';
 import 'package:zerotrust_time/data/time_store.dart';
 import 'package:zerotrust_time/l10n/l10n.dart';
+import 'package:zerotrust_time/links/zt_links.dart';
 import 'package:zerotrust_time/model/project.dart';
 import 'package:zerotrust_time/model/time_entry.dart';
 import 'package:zerotrust_time/notify/timer_notifier.dart';
@@ -82,9 +83,11 @@ Widget app(
   List<TimeEntry> entries = const [],
   List<Project> projects = const [],
   Locale locale = ZtLanguages.english,
+  ZtLinks links = const NoZtLinks(),
 }) {
   return ProviderScope(
     overrides: [
+      ztLinksProvider.overrideWithValue(links),
       ztAppConfigProvider.overrideWithValue(timeAppConfig),
       ztPreferencesStoreProvider.overrideWithValue(InMemoryPreferencesStore()),
       timerNotifierProvider.overrideWithValue(NoopTimerNotifier()),

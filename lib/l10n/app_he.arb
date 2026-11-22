@@ -138,5 +138,12 @@
   "widgetTapPlay": "אפשר להקיש על הפעלה כדי להתחיל טיימר",
   "widgetOpenApp": "פתיחת ZT Time",
   "widgetStartTimer": "הפעלת טיימר",
-  "widgetStartTimerFor": "הפעלת טיימר עבור {project}"
+  "widgetStartTimerFor": "הפעלת טיימר עבור {project}",
+  "linkedTo": "מקושר ל-{app}",
+  "pickFromApp": "מתוך {app}",
+  "removeLink": "הסרת הקישור",
+  "linkedAppMissing": "{app} לא מותקנת",
+  "trackStartQuestion": "להפעיל טיימר?",
+  "trackStartBody": "\"{title}\" מתוך {app}",
+  "trackStartUntitled": "טיימר עבור {app}"
 }
