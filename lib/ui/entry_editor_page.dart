@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:zero_trust_core/zero_trust_core.dart';
 
 import '../data/time_store.dart';
 import '../team/team.dart';
@@ -69,7 +70,11 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
   /// Picks a task or an event in its app; its title becomes the description
   /// (if there is none yet) and, for an event, its times the entry's.
   Future<void> _pickFrom(String app) async {
-    final item = await ref.read(ztLinksProvider).pick(app);
+    // The other app's screen is not a reason to auto-lock behind it.
+    final links = ref.read(ztLinksProvider);
+    final item = await ref
+        .read(vaultControllerProvider.notifier)
+        .whileShowingSystemUi(() => links.pick(app));
     if (item == null || !mounted) return;
     setState(() {
       if (_description.text.trim().isEmpty) _description.text = item.description;

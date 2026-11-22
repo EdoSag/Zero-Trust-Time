@@ -42,7 +42,16 @@ class _PlaceRulesPageState extends ConsumerState<PlaceRulesPage>
 
   Future<void> _refresh() async {
     final p = await ref.read(placeRemindersProvider).permissions();
-    if (mounted) setState(() => _permissions = p);
+    if (!mounted) return;
+    setState(() => _permissions = p);
+    _watch(p);
+  }
+
+  /// Places saved before location was allowed aren't watched yet: watch
+  /// them now (places already watched are left alone).
+  void _watch(ZtPlacePermissions p) {
+    final rules = ref.read(placeRulesProvider).value;
+    if (p.precise && rules != null) ref.read(placeTimerProvider).sync(rules).ignore();
   }
 
   /// Precise location, then "Allow all the time", then notifications.
@@ -51,7 +60,9 @@ class _PlaceRulesPageState extends ConsumerState<PlaceRulesPage>
     var p = await places.requestLocation();
     if (p.precise && !p.background) p = await places.requestBackground();
     if (!p.notifications) p = await places.requestNotifications();
-    if (mounted) setState(() => _permissions = p);
+    if (!mounted) return;
+    setState(() => _permissions = p);
+    _watch(p);
   }
 
   Future<void> _add(List<PlaceRule> rules) async {
