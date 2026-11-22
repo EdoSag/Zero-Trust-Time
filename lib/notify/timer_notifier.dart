@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -6,7 +7,8 @@ import '../l10n/l10n.dart';
 
 /// Shows that a timer is running, outside the app.
 abstract interface class TimerNotifier {
-  /// A lasting notification with a clock counting from [start], and, when
+  /// A lasting notification with a clock counting from [start] and a Stop
+  /// button (Android), and, when
   /// [nudgeAt] is in the future, one "still running?" reminder then.
   /// [title] is the only entry text that leaves the vault.
   Future<void> showRunning({
@@ -59,6 +61,9 @@ class LocalTimerNotifier implements TimerNotifier {
   static const _runningId = 1;
   static const _nudgeId = 2;
 
+  /// The running notification, posted by the Android side.
+  static const _running = MethodChannel('dev.sagron.zerotrusttime/running_notification');
+
   Future<void> _init() => _ready ??= _plugin.initialize(
     settings: const InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -97,32 +102,18 @@ class LocalTimerNotifier implements TimerNotifier {
   }) async {
     await _init();
     final l = currentL10n;
-    // The live clock is an Android feature; iOS gets only the nudge.
+    // The live clock and its Stop button are Android only; iOS gets only
+    // the nudge. Posted natively (RunningTimerNotification.kt) so that Stop
+    // works while the vault is locked, like the widget's Stop.
     if (_android != null) {
-      await _plugin.show(
-        id: _runningId,
-        title: title,
-        body: l.tapToOpen,
-        notificationDetails: NotificationDetails(
-          android: AndroidNotificationDetails(
-            'timer_running',
-            l.channelRunning,
-            channelDescription: l.channelRunningBody,
-            importance: Importance.low,
-            priority: Priority.low,
-            ongoing: true,
-            autoCancel: false,
-            onlyAlertOnce: true,
-            playSound: false,
-            showWhen: true,
-            when: start.millisecondsSinceEpoch,
-            usesChronometer: true,
-            category: AndroidNotificationCategory.stopwatch,
-            // The lock screen shows "ZT Time", not what is being tracked.
-            visibility: NotificationVisibility.private,
-          ),
-        ),
-      );
+      await _running.invokeMethod<void>('show', {
+        'start': start.millisecondsSinceEpoch,
+        'title': title,
+        'body': l.tapToOpen,
+        'stop': l.stop,
+        'channelName': l.channelRunning,
+        'channelDescription': l.channelRunningBody,
+      });
     }
     await _plugin.cancel(id: _nudgeId);
     if (nudgeAt != null && nudgeAt.isAfter(DateTime.now())) {
@@ -151,6 +142,10 @@ class LocalTimerNotifier implements TimerNotifier {
   @override
   Future<void> clear() async {
     await _init();
+    if (_android != null) {
+      await _running.invokeMethod<void>('clear');
+    }
+    // Also one an older version posted through the plugin.
     await _plugin.cancel(id: _runningId);
     await _plugin.cancel(id: _nudgeId);
   }

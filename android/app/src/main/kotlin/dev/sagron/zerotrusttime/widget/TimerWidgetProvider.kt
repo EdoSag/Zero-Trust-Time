@@ -37,7 +37,8 @@ class TimerWidgetProvider : HomeWidgetProvider() {
 
     companion object {
         private const val ACTION_START = "dev.sagron.zerotrusttime.widget.START"
-        private const val ACTION_STOP = "dev.sagron.zerotrusttime.widget.STOP"
+        /** Also the running notification's Stop (notify/RunningTimerNotification.kt). */
+        const val ACTION_STOP = "dev.sagron.zerotrusttime.widget.STOP"
         private const val EXTRA_PROJECT = "project_id"
         private const val MAX_RECENT = 3
 
@@ -238,7 +239,8 @@ class TimerWidgetProvider : HomeWidgetProvider() {
 }
 
 /**
- * Receives the widget's own Start and Stop taps. Not exported, so only this
+ * Receives the widget's own Start and Stop taps, and the Stop in the
+ * running notification. Not exported, so only this
  * app's PendingIntents reach it; no other app can start or stop a timer.
  */
 class TimerWidgetTapReceiver : android.content.BroadcastReceiver() {
