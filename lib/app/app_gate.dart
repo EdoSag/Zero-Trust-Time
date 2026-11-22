@@ -7,6 +7,8 @@ import 'package:zero_trust_core/zero_trust_core.dart';
 import '../data/time_store.dart';
 import '../model/time_entry.dart';
 import '../notify/timer_notifier.dart';
+import '../links/zt_links.dart';
+import '../ui/entry_editor_page.dart';
 import '../ui/home_page.dart';
 import '../widget/timer_widget.dart';
 import 'auth_providers.dart';
@@ -157,7 +159,10 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _schedule());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _schedule();
+      _takeTrackRequest();
+    });
   }
 
   @override
@@ -170,7 +175,81 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
   /// Back on screen: the widget may have been tapped meanwhile.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _schedule();
+    if (state == AppLifecycleState.resumed) {
+      _schedule();
+      _takeTrackRequest();
+    }
+  }
+
+  bool _tracking = false;
+
+  /// ZT Tasks or ZT Calendar opened Time to track time on a task or an
+  /// event (see lib/links/zt_links.dart). An event's times become an entry
+  /// to check and save; otherwise a timer starts once the user agrees.
+  /// Either way Time then goes back to the app that asked.
+  Future<void> _takeTrackRequest() async {
+    if (_tracking) return;
+    _tracking = true;
+    try {
+      final links = ref.read(ztLinksProvider);
+      final request = await links.takeTrackRequest();
+      if (request == null || !mounted) return;
+      final repo = ref.read(timeRepositoryProvider);
+      final link = request.link;
+      // Time spent on the same task before: same project, tags, billable.
+      final before = link == null ? null : await repo.lastLinkedTo(link);
+      if (!mounted) return;
+      if (request.isLog) {
+        final saved = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (_) => EntryEditorPage(
+              draft: TimeEntry(
+                id: TimeRepository.newId(),
+                description: request.title,
+                projectId: before?.projectId,
+                tags: before?.tags ?? const [],
+                billable: before?.billable ?? false,
+                link: link,
+                start: request.start!,
+                end: request.end,
+              ),
+            ),
+          ),
+        );
+        await links.finishTrack(saved: saved == true);
+        return;
+      }
+      final app = linkedAppName(request.app);
+      final start = await showDialog<bool>(
+        context: context,
+        builder: (d) => AlertDialog(
+          title: Text(d.l10n.trackStartQuestion),
+          content: Text(
+            request.title.isEmpty
+                ? d.l10n.trackStartUntitled(app)
+                : d.l10n.trackStartBody(request.title, app),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(d).pop(false), child: Text(d.l10n.cancel)),
+            TextButton(onPressed: () => Navigator.of(d).pop(true), child: Text(d.l10n.start)),
+          ],
+        ),
+      );
+      if (start == true) {
+        await repo.start(
+          description: request.title,
+          projectId: before?.projectId,
+          tags: before?.tags ?? const [],
+          billable: before?.billable ?? false,
+          link: link,
+        );
+      }
+      await links.finishTrack(saved: start == true);
+    } on Object catch (e) {
+      debugPrint('Track request not handled: $e');
+    } finally {
+      _tracking = false;
+    }
   }
 
   /// Starts and stops tapped on the widget, at the time they were tapped.

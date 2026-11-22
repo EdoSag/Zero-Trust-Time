@@ -266,5 +266,50 @@
         "type": "String"
       }
     }
+  },
+  "linkedTo": "Linked to {app}",
+  "@linkedTo": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "pickFromApp": "From {app}",
+  "@pickFromApp": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "removeLink": "Remove link",
+  "linkedAppMissing": "{app} isn't installed",
+  "@linkedAppMissing": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "trackStartQuestion": "Start a timer?",
+  "trackStartBody": "\"{title}\" from {app}",
+  "@trackStartBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "trackStartUntitled": "A timer for {app}",
+  "@trackStartUntitled": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
   }
 }

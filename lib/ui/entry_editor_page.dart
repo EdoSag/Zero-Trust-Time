@@ -7,32 +7,44 @@ import '../model/time_entry.dart';
 import '../util/format.dart';
 import 'project_widgets.dart';
 import '../l10n/l10n.dart';
+import '../links/zt_links.dart';
 
-/// Adds time by hand, or edits an entry (a running one too).
+/// Adds time by hand, or edits an entry (a running one too). Pops `true`
+/// once saved.
 class EntryEditorPage extends ConsumerStatefulWidget {
-  const EntryEditorPage({super.key, this.entry});
+  const EntryEditorPage({super.key, this.entry, this.draft});
 
+  /// The saved entry to edit.
   final TimeEntry? entry;
+
+  /// A new entry filled in ahead, e.g. from a ZT Calendar event.
+  final TimeEntry? draft;
 
   @override
   ConsumerState<EntryEditorPage> createState() => _EntryEditorPageState();
 }
 
 class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
-  late final _description = TextEditingController(text: widget.entry?.description ?? '');
-  late final _tags = TextEditingController(text: widget.entry?.tags.join(', ') ?? '');
-  late String? _projectId = widget.entry?.projectId;
-  late bool _billable = widget.entry?.billable ?? false;
+  late final TimeEntry? _initial = widget.entry ?? widget.draft;
+  late final _description = TextEditingController(text: _initial?.description ?? '');
+  late final _tags = TextEditingController(text: _initial?.tags.join(', ') ?? '');
+  late String? _projectId = _initial?.projectId;
+  late bool _billable = _initial?.billable ?? false;
+  late EntryLink? _link = _initial?.link;
   late DateTime _start;
   DateTime? _end;
   String? _error;
+
+  /// ZT Tasks and ZT Calendar, when installed, to pick from.
+  List<String> _pickable = const [];
 
   bool get _running => widget.entry?.running ?? false;
 
   @override
   void initState() {
     super.initState();
-    final e = widget.entry;
+    _findPickable();
+    final e = _initial;
     if (e != null) {
       _start = e.start;
       _end = e.end;
@@ -41,6 +53,40 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
       final now = DateTime.now();
       _end = DateTime(now.year, now.month, now.day, now.hour, now.minute);
       _start = _end!.subtract(const Duration(hours: 1));
+    }
+  }
+
+  Future<void> _findPickable() async {
+    final links = ref.read(ztLinksProvider);
+    final found = <String>[
+      for (final app in linkedApps.keys)
+        if (await links.canPick(app)) app,
+    ];
+    if (mounted && found.isNotEmpty) setState(() => _pickable = found);
+  }
+
+  /// Picks a task or an event in its app; its title becomes the description
+  /// (if there is none yet) and, for an event, its times the entry's.
+  Future<void> _pickFrom(String app) async {
+    final item = await ref.read(ztLinksProvider).pick(app);
+    if (item == null || !mounted) return;
+    setState(() {
+      if (_description.text.trim().isEmpty) _description.text = item.description;
+      _link = item.link ?? _link;
+      if (item.hasTimes && !_running) {
+        _start = item.start!;
+        _end = item.end;
+        _error = null;
+      }
+    });
+  }
+
+  Future<void> _openLink(EntryLink link) async {
+    final opened = await ref.read(ztLinksProvider).open(link);
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.linkedAppMissing(linkedAppName(link.app)))),
+      );
     }
   }
 
@@ -86,12 +132,13 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
           if (t.trim().isNotEmpty) t.trim().replaceFirst(RegExp('^#'), ''),
       }.toList(),
       billable: _billable,
+      link: _link,
       start: _start,
       end: _running ? null : end,
       createdAt: widget.entry?.createdAt,
     );
     await ref.read(timeRepositoryProvider).saveEntry(entry);
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) Navigator.of(context).pop(true);
   }
 
   Future<void> _delete() async {
@@ -163,6 +210,34 @@ class _EntryEditorPageState extends ConsumerState<EntryEditorPage> {
               ),
             ),
           ),
+          if (_link case final link?)
+            ListTile(
+              leading: const Icon(Icons.link),
+              title: Text(context.l10n.linkedTo(linkedAppName(link.app))),
+              subtitle: link.title.isEmpty ? null : Text(link.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+              onTap: () => _openLink(link),
+              trailing: IconButton(
+                tooltip: context.l10n.removeLink,
+                icon: const Icon(Icons.link_off),
+                onPressed: () => setState(() => _link = null),
+              ),
+            )
+          else if (_pickable.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  for (final app in _pickable)
+                    ActionChip(
+                      avatar: Icon(app == 'calendar' ? Icons.event_outlined : Icons.task_alt),
+                      label: Text(context.l10n.pickFromApp(linkedAppName(app))),
+                      onPressed: () => _pickFrom(app),
+                    ),
+                ],
+              ),
+            ),
           ListTile(
             leading: const Icon(Icons.play_circle_outline),
             title: Text(context.l10n.start),

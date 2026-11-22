@@ -13,6 +13,7 @@ import '../util/format.dart';
 import 'entry_editor_page.dart';
 import 'project_widgets.dart';
 import '../l10n/l10n.dart';
+import '../links/zt_links.dart';
 
 /// Rebuilds once a second, for clocks that count while a timer runs.
 class EverySecond extends StatefulWidget {
@@ -386,6 +387,16 @@ class _EntryTile extends ConsumerWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (entry.link != null)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 6),
+                child: Icon(
+                  Icons.link,
+                  size: 16,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  semanticLabel: context.l10n.linkedTo(linkedAppName(entry.link!.app)),
+                ),
+              ),
             if (entry.billable)
               Padding(
                 padding: const EdgeInsetsDirectional.only(end: 6),

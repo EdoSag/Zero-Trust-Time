@@ -33,6 +33,12 @@
                  native link handling in MainActivity), not Flutter's router: AppGate has no
                  route for them. -->
             <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
+            <!-- Another Zero-Trust app asks to track time on a task or an event
+                 (ZtLinks.kt; only apps signed with this app's key are answered). -->
+            <intent-filter>
+                <action android:name="bz.zerotrust.action.TRACK_TIME"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
             <!-- Password-reset emails: https://zerotrust.bz/auth/time/?code=… (see EmailLinks). -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
@@ -74,6 +80,16 @@
         </receiver>
     </application>
     <queries>
+        <!-- ZT Tasks and ZT Calendar, for picking a task or an event and
+             opening a linked one (ZtLinks.kt). -->
+        <package android:name="dev.sagron.zerotrusttasks"/>
+        <package android:name="dev.sagron.zerotrustcalendar"/>
+        <intent>
+            <action android:name="bz.zerotrust.action.PICK_TEXT"/>
+        </intent>
+        <intent>
+            <action android:name="bz.zerotrust.action.OPEN_ITEM"/>
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

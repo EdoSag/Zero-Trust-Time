@@ -483,4 +483,35 @@ class AppL10nEn extends AppL10n {
   String widgetStartTimerFor(String project) {
     return 'Start a timer for $project';
   }
+
+  @override
+  String linkedTo(String app) {
+    return 'Linked to $app';
+  }
+
+  @override
+  String pickFromApp(String app) {
+    return 'From $app';
+  }
+
+  @override
+  String get removeLink => 'Remove link';
+
+  @override
+  String linkedAppMissing(String app) {
+    return '$app isn\'t installed';
+  }
+
+  @override
+  String get trackStartQuestion => 'Start a timer?';
+
+  @override
+  String trackStartBody(String title, String app) {
+    return '\"$title\" from $app';
+  }
+
+  @override
+  String trackStartUntitled(String app) {
+    return 'A timer for $app';
+  }
 }
