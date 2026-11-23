@@ -9,6 +9,7 @@ import 'app/app_gate.dart';
 import 'app/time_config.dart';
 import 'l10n/l10n.dart';
 import 'app/email_links.dart';
+import 'team/team.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +23,11 @@ Future<void> main() async {
   await ZtLanguageController.preload();
   runApp(
     ProviderScope(
-      overrides: [ztAppConfigProvider.overrideWithValue(timeAppConfig)],
+      overrides: [
+        ztAppConfigProvider.overrideWithValue(timeAppConfig),
+        // Business mode: who may write what in a team (lib/team/team.dart).
+        ztSpacePolicyProvider.overrideWithValue(timeSpacePolicy),
+      ],
       child: const ZeroTrustTimeApp(),
     ),
   );
@@ -46,7 +51,7 @@ class ZeroTrustTimeApp extends ConsumerWidget {
         locale: ref.watch(ztLanguageProvider),
         supportedLocales: ZtLanguages.supported,
         localizationsDelegates: const [AppL10n.delegate, ...ZtLanguages.delegates],
-        home: home,
+        home: ZtSignInHandoffScope(child: home),
         // Any touch on any screen counts as activity for auto-lock.
         builder: (BuildContext context, Widget? child) => Listener(
           onPointerDown: (_) => ref.read(vaultControllerProvider.notifier).touch(),

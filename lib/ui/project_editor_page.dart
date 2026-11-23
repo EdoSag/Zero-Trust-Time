@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/time_settings.dart';
 import '../data/time_store.dart';
+import '../team/team.dart';
 import '../model/project.dart';
 import '../l10n/l10n.dart';
 
@@ -52,6 +53,7 @@ class _ProjectEditorPageState extends ConsumerState<ProjectEditorPage> {
     if (_nameError != null || _rateError != null) return;
     final project = Project(
       id: widget.project?.id ?? TimeRepository.newId(),
+      space: widget.project?.space ?? ref.read(workspaceProvider),
       name: name,
       client: _client.text.trim(),
       color: _color,
@@ -76,7 +78,10 @@ class _ProjectEditorPageState extends ConsumerState<ProjectEditorPage> {
       ),
     );
     if (ok != true) return;
-    await ref.read(timeRepositoryProvider).deleteProject(widget.project!.id);
+    await ref.read(timeRepositoryProvider).deleteProject(
+      widget.project!.id,
+      space: widget.project!.space,
+    );
     if (mounted) Navigator.of(context).pop();
   }
 

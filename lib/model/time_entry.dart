@@ -1,5 +1,39 @@
 import 'package:flutter/foundation.dart';
 
+/// Where an entry came from in another Zero-Trust app: a task in ZT Tasks
+/// or an event in ZT Calendar (roadmap TM-2, TM-5). Only the other app's
+/// item id and the title it gave are kept; tapping the link asks that app
+/// to open the item.
+@immutable
+class EntryLink {
+  const EntryLink({required this.app, required this.id, this.title = ''});
+
+  /// The other app's id: 'tasks', 'calendar', or another suite app.
+  final String app;
+
+  /// The item's id in that app.
+  final String id;
+  final String title;
+
+  Map<String, Object?> toJson() => {'app': app, 'id': id, 'title': title};
+
+  static EntryLink? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final app = json['app'];
+    final id = json['id'];
+    if (app is! String || app.isEmpty || id is! String || id.isEmpty) return null;
+    final title = json['title'];
+    return EntryLink(app: app, id: id, title: title is String ? title : '');
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is EntryLink && other.app == app && other.id == id && other.title == title;
+
+  @override
+  int get hashCode => Object.hash(app, id, title);
+}
+
 /// One stretch of tracked time. An entry without an [end] is a running
 /// timer; it is synced like any other, so every device sees it running.
 @immutable
@@ -12,9 +46,27 @@ class TimeEntry {
     this.projectId,
     this.tags = const [],
     this.billable = false,
+    this.link,
     this.createdAt,
     this.updatedAt,
+    this.space,
   });
+
+  /// Entry ids in a team are `entry/<user id>/<uuid>`: only that member may
+  /// change them (the team's space policy).
+  static const teamPrefix = 'entry/';
+
+  /// The team (shared space) the entry is in; null for the account's own.
+  /// Not stored: it is where the entry was read from.
+  final String? space;
+
+  /// Who logged a team entry; null for the account's own entries.
+  String? get ownerId {
+    if (!id.startsWith(teamPrefix)) return null;
+    final rest = id.substring(teamPrefix.length);
+    final slash = rest.indexOf('/');
+    return slash <= 0 ? null : rest.substring(0, slash);
+  }
 
   final String id;
   final String description;
@@ -27,6 +79,9 @@ class TimeEntry {
   /// Null while the timer runs.
   final DateTime? end;
   final bool billable;
+
+  /// The task or event this time was spent on, when it came from one.
+  final EntryLink? link;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -51,8 +106,11 @@ class TimeEntry {
     DateTime? start,
     Object? end = _unset,
     bool? billable,
+    Object? link = _unset,
     DateTime? createdAt,
+    Object? space = _unset,
   }) => TimeEntry(
+    space: identical(space, _unset) ? this.space : space as String?,
     id: id ?? this.id,
     description: description ?? this.description,
     projectId: identical(projectId, _unset) ? this.projectId : projectId as String?,
@@ -60,6 +118,7 @@ class TimeEntry {
     start: start ?? this.start,
     end: identical(end, _unset) ? this.end : end as DateTime?,
     billable: billable ?? this.billable,
+    link: identical(link, _unset) ? this.link : link as EntryLink?,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt,
   );
@@ -71,6 +130,7 @@ class TimeEntry {
     'start': start.toUtc().toIso8601String(),
     'end': end?.toUtc().toIso8601String(),
     'billable': billable,
+    if (link != null) 'link': link!.toJson(),
     'createdAt': createdAt?.toUtc().toIso8601String(),
   };
 
@@ -90,6 +150,7 @@ class TimeEntry {
       start: start,
       end: end,
       billable: json['billable'] == true,
+      link: EntryLink.fromJson(json['link']),
       createdAt: _time(json['createdAt']),
       updatedAt: updatedAt,
     );

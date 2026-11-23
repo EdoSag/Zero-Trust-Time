@@ -483,4 +483,174 @@ class AppL10nEn extends AppL10n {
   String widgetStartTimerFor(String project) {
     return 'Start a timer for $project';
   }
+
+  @override
+  String linkedTo(String app) {
+    return 'Linked to $app';
+  }
+
+  @override
+  String pickFromApp(String app) {
+    return 'From $app';
+  }
+
+  @override
+  String get removeLink => 'Remove link';
+
+  @override
+  String linkedAppMissing(String app) {
+    return '$app isn\'t installed';
+  }
+
+  @override
+  String get trackStartQuestion => 'Start a timer?';
+
+  @override
+  String trackStartBody(String title, String app) {
+    return '\"$title\" from $app';
+  }
+
+  @override
+  String trackStartUntitled(String app) {
+    return 'A timer for $app';
+  }
+
+  @override
+  String get placeTimerTitle => 'Start and stop by place';
+
+  @override
+  String get placeTimerSettingsBody =>
+      'Start the timer when you arrive at work, stop it when you leave';
+
+  @override
+  String get placeTimerAdd => 'Add a place';
+
+  @override
+  String get placeTimerIntro =>
+      'Time can start a timer when you arrive at a place and stop it when you leave. Your phone watches the place itself; your location never leaves the phone. Works while Time is locked: the entry is saved the next time you open it.';
+
+  @override
+  String get placeTimerEmpty =>
+      'No places yet. Add your office, a client or the studio.';
+
+  @override
+  String get placeTimerUnnamed => 'Unnamed place';
+
+  @override
+  String get placeTimerStarts => 'starts on arrival';
+
+  @override
+  String get placeTimerStops => 'stops on leaving';
+
+  @override
+  String get placeTimerNeedsLocation => 'Allow location all the time';
+
+  @override
+  String get placeTimerNeedsLocationBody =>
+      'Needed to notice arriving and leaving while Time is closed. Tap to allow.';
+
+  @override
+  String get placeTimerStartOnArrive => 'Start a timer when I arrive';
+
+  @override
+  String get placeTimerStartOnArriveBody => 'Only when no timer is running';
+
+  @override
+  String get placeTimerStopOnLeave => 'Stop it when I leave';
+
+  @override
+  String get placeTimerStopOnLeaveBody =>
+      'Only a timer this place started; one you started yourself keeps running';
+
+  @override
+  String get workspaces => 'Teams';
+
+  @override
+  String get workspaceMine => 'My time';
+
+  @override
+  String get workspaceMineBody => 'Only you see it';
+
+  @override
+  String get teamUnnamed => 'Team';
+
+  @override
+  String teamOwnerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return 'Owner · $_temp0';
+  }
+
+  @override
+  String teamMemberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamWaiting => 'Waiting for an owner to let you in';
+
+  @override
+  String get teamManage => 'Members and invites';
+
+  @override
+  String teamJoinRequest(String name, String team) {
+    return '$name wants to join $team';
+  }
+
+  @override
+  String get teamJoinRequestBody =>
+      'Compare the code on their phone, then let them in';
+
+  @override
+  String get teamCreate => 'New team';
+
+  @override
+  String get teamCreateBody =>
+      'Track time together: shared projects and reports';
+
+  @override
+  String get teamCreateExplain =>
+      'Everyone you invite tracks time on the team\'s projects, and everyone sees the team\'s reports. Only owners change projects and rates. All of it is end-to-end encrypted.';
+
+  @override
+  String get teamCreateAction => 'Create';
+
+  @override
+  String get teamName => 'Team name';
+
+  @override
+  String get teamNameHint => 'For example Acme Studio';
+
+  @override
+  String get teamYourName => 'Your name in the team';
+
+  @override
+  String get teamJoin => 'Join a team';
+
+  @override
+  String get teamPageBody =>
+      'Members track time on the team\'s projects and see the team\'s reports. Owners add projects and rates and let people in.';
+
+  @override
+  String get teamNeedsInternet =>
+      'Creating a team needs the internet. Try again when you\'re online.';
+
+  @override
+  String get byMember => 'By member';
+
+  @override
+  String get memberYou => 'You';
+
+  @override
+  String get memberFormer => 'Former member';
 }

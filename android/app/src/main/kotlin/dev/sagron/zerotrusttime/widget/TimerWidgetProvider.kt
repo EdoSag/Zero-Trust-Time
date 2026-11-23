@@ -37,7 +37,8 @@ class TimerWidgetProvider : HomeWidgetProvider() {
 
     companion object {
         private const val ACTION_START = "dev.sagron.zerotrusttime.widget.START"
-        private const val ACTION_STOP = "dev.sagron.zerotrusttime.widget.STOP"
+        /** Also the running notification's Stop (notify/RunningTimerNotification.kt). */
+        const val ACTION_STOP = "dev.sagron.zerotrusttime.widget.STOP"
         private const val EXTRA_PROJECT = "project_id"
         private const val MAX_RECENT = 3
 
@@ -98,9 +99,15 @@ class TimerWidgetProvider : HomeWidgetProvider() {
         }
     }
 
-    private fun tap(context: Context, start: Boolean, projectId: String?) {
+    /**
+     * Queues a start (for [projectId]) or a stop now, as a tap on the widget
+     * does, and shows it on the widget. Also used by the running
+     * notification's Stop and by start and stop by place (PlaceTimer.kt).
+     * Returns the time queued, or null when signed out.
+     */
+    internal fun tap(context: Context, start: Boolean, projectId: String?): Long? {
         val prefs = HomeWidgetPlugin.getData(context)
-        if (prefs.getBoolean("time_widget_signed_out", false)) return
+        if (prefs.getBoolean("time_widget_signed_out", false)) return null
         val now = System.currentTimeMillis()
         val line = if (start) "start|$now|${projectId.orEmpty()}" else "stop|$now"
         val queue = prefs.getString("time_widget_pending", null).orEmpty()
@@ -128,6 +135,7 @@ class TimerWidgetProvider : HomeWidgetProvider() {
         manager.getAppWidgetIds(ComponentName(context, TimerWidgetProvider::class.java)).forEach {
             manager.updateAppWidget(it, buildViews(context, prefs, manager.getAppWidgetOptions(it)))
         }
+        return now
     }
 
     private fun buildViews(context: Context, prefs: SharedPreferences, options: Bundle?): RemoteViews {
@@ -238,7 +246,8 @@ class TimerWidgetProvider : HomeWidgetProvider() {
 }
 
 /**
- * Receives the widget's own Start and Stop taps. Not exported, so only this
+ * Receives the widget's own Start and Stop taps, and the Stop in the
+ * running notification. Not exported, so only this
  * app's PendingIntents reach it; no other app can start or stop a timer.
  */
 class TimerWidgetTapReceiver : android.content.BroadcastReceiver() {

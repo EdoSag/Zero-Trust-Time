@@ -9,7 +9,9 @@ import '../app/time_settings.dart';
 import '../csv/timesheet_csv.dart';
 import '../data/time_store.dart';
 import '../notify/timer_notifier.dart';
+import '../places/place_timer.dart';
 import '../util/format.dart';
+import 'place_rules_page.dart';
 import 'timesheet_export.dart';
 import '../l10n/l10n.dart';
 
@@ -28,6 +30,7 @@ class TimeSettingsPage extends ConsumerWidget {
       showStorageUsage: true,
       onSignedOut: () async {
         await ref.read(timerNotifierProvider).clear();
+        await ref.read(placeTimerProvider).clear();
         if (context.mounted) {
           Navigator.of(context).popUntil((Route<dynamic> r) => r.isFirst);
         }
@@ -92,6 +95,15 @@ class TimeSettingsPage extends ConsumerWidget {
               ? (v) => ctrl.update((x) => x.copyWith(notificationText: v))
               : null,
         ),
+        if (ref.read(placeTimerProvider).supported)
+          ListTile(
+            leading: const Icon(Icons.place_outlined),
+            title: Text(context.l10n.placeTimerTitle),
+            subtitle: Text(context.l10n.placeTimerSettingsBody),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const PlaceRulesPage()),
+            ),
+          ),
         SwitchListTile(
           secondary: const Icon(Icons.widgets_outlined),
           title: Text(context.l10n.widgetDetails),

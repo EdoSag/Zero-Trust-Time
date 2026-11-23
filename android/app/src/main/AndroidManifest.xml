@@ -6,6 +6,16 @@
          kept across a reboot. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Start and stop by place (TM-3), only once the user sets up a place:
+         the phone itself watches it, the location never leaves the phone.
+         (zt_places declares the same.) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <!-- Team invite QR codes are scanned with the camera, only when the
+         user taps "Scan QR code" (Business mode). -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
 
     <application
         android:supportsRtl="true"
@@ -33,6 +43,20 @@
                  native link handling in MainActivity), not Flutter's router: AppGate has no
                  route for them. -->
             <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
+            <!-- Another Zero-Trust app asks to track time on a task or an event
+                 (ZtLinks.kt; only apps signed with this app's key are answered). -->
+            <intent-filter>
+                <action android:name="bz.zerotrust.action.TRACK_TIME"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <!-- Team invites (Business mode): https://zerotrust.bz/join/time#zt1.time.…
+                 The invite after the # never reaches a server (see join_links.dart). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="zerotrust.bz" android:pathPrefix="/join/time"/>
+            </intent-filter>
             <!-- Password-reset emails: https://zerotrust.bz/auth/time/?code=… (see EmailLinks). -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
@@ -63,6 +87,19 @@
         <receiver
             android:name=".widget.TimerWidgetTapReceiver"
             android:exported="false" />
+        <!-- Start and stop by place (TM-3, PlaceTimer.kt): Android's own
+             proximity alerts, set again after a reboot or an update. -->
+        <receiver
+            android:name=".places.PlaceTimerReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".places.PlaceTimerBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+        </receiver>
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>
@@ -74,6 +111,16 @@
         </receiver>
     </application>
     <queries>
+        <!-- ZT Tasks and ZT Calendar, for picking a task or an event and
+             opening a linked one (ZtLinks.kt). -->
+        <package android:name="dev.sagron.zerotrusttasks"/>
+        <package android:name="dev.sagron.zerotrustcalendar"/>
+        <intent>
+            <action android:name="bz.zerotrust.action.PICK_TEXT"/>
+        </intent>
+        <intent>
+            <action android:name="bz.zerotrust.action.OPEN_ITEM"/>
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

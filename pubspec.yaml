@@ -1,7 +1,7 @@
 name: zerotrust_time
 description: "Zero-Trust Time: an end-to-end encrypted time tracker with projects, reports and exports."
 publish_to: none
-version: 0.3.3+7
+version: 0.5.0+10
 
 environment:
   sdk: ^3.9.0
@@ -24,7 +24,23 @@ dependencies:
     git:
       url: https://github.com/EdoSag/Zero-Trust-Core.git
       path: packages/zero_trust_core
-      ref: 08eccf33e5989c0efceba67d351159b979ae0740
+      # The v1.0.1 tag's commit. zt_sharing_ui reaches the core by this
+      # commit, and pub needs both to name the core the same way.
+      ref: a27adea1a4a36959fc7bdbf10dc903fcd1f30b45
+  # Place picker and location permissions for start and stop by place
+  # (TM-3). Same repository and commit as zero_trust_core.
+  zt_places:
+    git:
+      url: https://github.com/EdoSag/Zero-Trust-Core.git
+      path: packages/zt_places
+      ref: v1.0.1
+  # The shared sharing screens (invite, join, members) for Business mode
+  # teams (TM-6). Same repository and commit as zero_trust_core.
+  zt_sharing_ui:
+    git:
+      url: https://github.com/EdoSag/Zero-Trust-Core.git
+      path: packages/zt_sharing_ui
+      ref: v1.0.1
   flutter_riverpod: ^3.5.0
   supabase_flutter: ^2.9.0
   # Reset links from account emails (EmailLinks).
@@ -51,7 +67,7 @@ dev_dependencies:
     git:
       url: https://github.com/EdoSag/Zero-Trust-Core.git
       path: packages/zt_release_checks
-      ref: b43fcd045722bc364ef2eaa739db181f9dac144f
+      ref: v1.0.1
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0

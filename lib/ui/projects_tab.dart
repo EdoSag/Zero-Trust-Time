@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/time_settings.dart';
 import '../data/time_store.dart';
+import '../team/team.dart';
 import '../model/project.dart';
 import '../model/time_entry.dart';
 import '../util/format.dart';
@@ -48,9 +49,12 @@ class ProjectsTab extends ConsumerWidget {
       trailing: p.hourlyRate == null
           ? null
           : Text(context.l10n.perHour(formatAmount(p.hourlyRate!, ref.watch(timeSettingsProvider).currency))),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => ProjectEditorPage(project: p)),
-      ),
+      // In a team only owners change projects.
+      onTap: ref.watch(canEditProjectsProvider)
+          ? () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => ProjectEditorPage(project: p)),
+            )
+          : null,
     );
 
     return ListView(

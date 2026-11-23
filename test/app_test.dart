@@ -7,9 +7,12 @@ import 'package:zero_trust_core/zero_trust_core.dart';
 import 'package:zerotrust_time/app/time_config.dart';
 import 'package:zerotrust_time/data/time_store.dart';
 import 'package:zerotrust_time/l10n/l10n.dart';
+import 'package:zerotrust_time/links/zt_links.dart';
+import 'package:zerotrust_time/model/place_rule.dart';
 import 'package:zerotrust_time/model/project.dart';
 import 'package:zerotrust_time/model/time_entry.dart';
 import 'package:zerotrust_time/notify/timer_notifier.dart';
+import 'package:zerotrust_time/team/team.dart';
 import 'package:zerotrust_time/ui/entry_editor_page.dart';
 import 'package:zerotrust_time/ui/home_page.dart';
 
@@ -51,7 +54,7 @@ class MemoryRepository extends TimeRepository {
   }
 
   @override
-  Future<void> deleteEntry(String id) async {
+  Future<void> deleteEntry(String id, {String? space}) async {
     _entries.remove(id);
     _entryChanges.add(entries);
   }
@@ -69,10 +72,18 @@ class MemoryRepository extends TimeRepository {
   }
 
   @override
-  Future<void> deleteProject(String id) async {
+  Future<void> deleteProject(String id, {String? space}) async {
     _projects.remove(id);
     _projectChanges.add(projects);
   }
+
+  final placeRules = <String, PlaceRule>{};
+
+  @override
+  Future<void> savePlaceRule(PlaceRule rule) async => placeRules[rule.id] = rule;
+
+  @override
+  Future<void> deletePlaceRule(String id) async => placeRules.remove(id);
 }
 
 late MemoryRepository repo;
@@ -82,9 +93,16 @@ Widget app(
   List<TimeEntry> entries = const [],
   List<Project> projects = const [],
   Locale locale = ZtLanguages.english,
+  ZtLinks links = const NoZtLinks(),
+  List<Team> teams = const [],
+  String? workspace,
 }) {
   return ProviderScope(
     overrides: [
+      ztLinksProvider.overrideWithValue(links),
+      teamsProvider.overrideWith((ref) async => teams),
+      if (workspace != null) workspaceProvider.overrideWithValue(workspace),
+      myUserIdProvider.overrideWithValue('me'),
       ztAppConfigProvider.overrideWithValue(timeAppConfig),
       ztPreferencesStoreProvider.overrideWithValue(InMemoryPreferencesStore()),
       timerNotifierProvider.overrideWithValue(NoopTimerNotifier()),

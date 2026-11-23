@@ -482,4 +482,172 @@ class AppL10nHe extends AppL10n {
   String widgetStartTimerFor(String project) {
     return 'הפעלת טיימר עבור $project';
   }
+
+  @override
+  String linkedTo(String app) {
+    return 'מקושר ל-$app';
+  }
+
+  @override
+  String pickFromApp(String app) {
+    return 'מתוך $app';
+  }
+
+  @override
+  String get removeLink => 'הסרת הקישור';
+
+  @override
+  String linkedAppMissing(String app) {
+    return '$app לא מותקנת';
+  }
+
+  @override
+  String get trackStartQuestion => 'להפעיל טיימר?';
+
+  @override
+  String trackStartBody(String title, String app) {
+    return '\"$title\" מתוך $app';
+  }
+
+  @override
+  String trackStartUntitled(String app) {
+    return 'טיימר עבור $app';
+  }
+
+  @override
+  String get placeTimerTitle => 'הפעלה ועצירה לפי מקום';
+
+  @override
+  String get placeTimerSettingsBody =>
+      'הטיימר מתחיל כשמגיעים לעבודה ונעצר כשיוצאים';
+
+  @override
+  String get placeTimerAdd => 'הוספת מקום';
+
+  @override
+  String get placeTimerIntro =>
+      'Time יכולה להפעיל טיימר כשמגיעים למקום ולעצור אותו כשיוצאים. הטלפון עצמו עוקב אחרי המקום, והמיקום שלך לא יוצא מהטלפון. עובד גם כש-Time נעולה: הרישום נשמר בפעם הבאה שפותחים אותה.';
+
+  @override
+  String get placeTimerEmpty =>
+      'עדיין אין מקומות. אפשר להוסיף את המשרד, לקוח או הסטודיו.';
+
+  @override
+  String get placeTimerUnnamed => 'מקום בלי שם';
+
+  @override
+  String get placeTimerStarts => 'מתחיל בהגעה';
+
+  @override
+  String get placeTimerStops => 'נעצר ביציאה';
+
+  @override
+  String get placeTimerNeedsLocation => 'צריך לאפשר מיקום כל הזמן';
+
+  @override
+  String get placeTimerNeedsLocationBody =>
+      'כדי לזהות הגעה ויציאה גם כש-Time סגורה. אפשר להקיש כדי לאפשר.';
+
+  @override
+  String get placeTimerStartOnArrive => 'להפעיל טיימר כשאני מגיע';
+
+  @override
+  String get placeTimerStartOnArriveBody => 'רק אם אין טיימר פעיל';
+
+  @override
+  String get placeTimerStopOnLeave => 'לעצור אותו כשאני יוצא';
+
+  @override
+  String get placeTimerStopOnLeaveBody =>
+      'רק טיימר שהמקום הפעיל; טיימר שהפעלת בעצמך ממשיך';
+
+  @override
+  String get workspaces => 'צוותים';
+
+  @override
+  String get workspaceMine => 'הזמן שלי';
+
+  @override
+  String get workspaceMineBody => 'רק את/ה רואה אותו';
+
+  @override
+  String get teamUnnamed => 'צוות';
+
+  @override
+  String teamOwnerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count אנשים',
+      one: 'אדם אחד',
+    );
+    return 'בעלים · $_temp0';
+  }
+
+  @override
+  String teamMemberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count אנשים',
+      one: 'אדם אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamWaiting => 'ממתין שבעלים יאשרו את הכניסה';
+
+  @override
+  String get teamManage => 'חברים והזמנות';
+
+  @override
+  String teamJoinRequest(String name, String team) {
+    return '$name רוצה להצטרף ל$team';
+  }
+
+  @override
+  String get teamJoinRequestBody => 'משווים את הקוד בטלפון שלהם ואז מאשרים';
+
+  @override
+  String get teamCreate => 'צוות חדש';
+
+  @override
+  String get teamCreateBody => 'מודדים זמן יחד: פרויקטים ודוחות משותפים';
+
+  @override
+  String get teamCreateExplain =>
+      'כל מי שמוזמן מודד זמן על הפרויקטים של הצוות, וכולם רואים את הדוחות של הצוות. רק בעלים משנים פרויקטים ותעריפים. הכול מוצפן מקצה לקצה.';
+
+  @override
+  String get teamCreateAction => 'יצירה';
+
+  @override
+  String get teamName => 'שם הצוות';
+
+  @override
+  String get teamNameHint => 'למשל סטודיו אקמה';
+
+  @override
+  String get teamYourName => 'השם שלך בצוות';
+
+  @override
+  String get teamJoin => 'הצטרפות לצוות';
+
+  @override
+  String get teamPageBody =>
+      'חברי הצוות מודדים זמן על הפרויקטים של הצוות ורואים את הדוחות שלו. בעלים מוסיפים פרויקטים ותעריפים ומאשרים כניסה.';
+
+  @override
+  String get teamNeedsInternet =>
+      'כדי ליצור צוות צריך חיבור לאינטרנט. אפשר לנסות שוב כשיש חיבור.';
+
+  @override
+  String get byMember => 'לפי חבר צוות';
+
+  @override
+  String get memberYou => 'את/ה';
+
+  @override
+  String get memberFormer => 'חבר צוות לשעבר';
 }

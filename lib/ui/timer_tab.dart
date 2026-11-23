@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/time_settings.dart';
 import '../data/time_store.dart';
+import '../team/team.dart';
 import '../model/project.dart';
 import '../model/report.dart';
 import '../model/time_entry.dart';
@@ -13,6 +14,7 @@ import '../util/format.dart';
 import 'entry_editor_page.dart';
 import 'project_widgets.dart';
 import '../l10n/l10n.dart';
+import '../links/zt_links.dart';
 
 /// Rebuilds once a second, for clocks that count while a timer runs.
 class EverySecond extends StatefulWidget {
@@ -83,7 +85,17 @@ class _TimerTabState extends ConsumerState<TimerTab> {
 
   @override
   Widget build(BuildContext context) {
-    final entries = ref.watch(entriesProvider);
+    // The chosen project belongs to the workspace it was chosen in.
+    ref.listen(workspaceProvider, (before, now) {
+      if (before != now && (_projectId != null || _billable)) {
+        setState(() {
+          _projectId = null;
+          _billable = false;
+        });
+      }
+    });
+    // In a team, only this account's own time; Reports show everyone's.
+    final entries = ref.watch(myEntriesProvider);
     final projects = {
       for (final p in ref.watch(projectsProvider).value ?? const <Project>[]) p.id: p,
     };
@@ -345,7 +357,7 @@ class _EntryTile extends ConsumerWidget {
       onDismissed: (_) async {
         final messenger = ScaffoldMessenger.of(context);
         final l = context.l10n;
-        await repo.deleteEntry(entry.id);
+        await repo.deleteEntry(entry.id, space: entry.space);
         messenger
           ..clearSnackBars()
           ..showSnackBar(
@@ -386,6 +398,16 @@ class _EntryTile extends ConsumerWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (entry.link != null)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 6),
+                child: Icon(
+                  Icons.link,
+                  size: 16,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  semanticLabel: context.l10n.linkedTo(linkedAppName(entry.link!.app)),
+                ),
+              ),
             if (entry.billable)
               Padding(
                 padding: const EdgeInsetsDirectional.only(end: 6),

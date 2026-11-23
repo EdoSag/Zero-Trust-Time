@@ -7,6 +7,12 @@ import 'package:zero_trust_core/zero_trust_core.dart';
 import '../data/time_store.dart';
 import '../model/time_entry.dart';
 import '../notify/timer_notifier.dart';
+import '../places/place_timer.dart';
+import '../links/zt_links.dart';
+import '../team/join_links.dart';
+import '../team/team.dart';
+import '../ui/team_pages.dart';
+import '../ui/entry_editor_page.dart';
 import '../ui/home_page.dart';
 import '../widget/timer_widget.dart';
 import 'auth_providers.dart';
@@ -85,6 +91,8 @@ class _AppGateState extends ConsumerState<AppGate> with WidgetsBindingObserver {
       if (user == null) {
         ref.read(vaultControllerProvider.notifier).lock();
         ref.read(timerNotifierProvider).clear().ignore();
+        // Places watched for this account stop starting timers.
+        ref.read(placeTimerProvider).clear().ignore();
         // Taps queued while locked belong to this account, not the next.
         const TimerWidget().discardPending().ignore();
         const TimerWidget().publish(const TimerWidgetState.signedOut()).ignore();
@@ -157,12 +165,26 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _schedule());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _schedule();
+      _takeTrackRequest();
+      _openInvite();
+    });
+    JoinLinks.pending.addListener(_openInvite);
+  }
+
+  /// A team invite link opened on this phone: the join screen, once.
+  void _openInvite() {
+    final link = JoinLinks.pending.value;
+    if (link == null || !mounted) return;
+    JoinLinks.pending.value = null;
+    joinTeam(context, link: link);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    JoinLinks.pending.removeListener(_openInvite);
     _debounce?.cancel();
     super.dispose();
   }
@@ -170,7 +192,101 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
   /// Back on screen: the widget may have been tapped meanwhile.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _schedule();
+    if (state == AppLifecycleState.resumed) {
+      _schedule();
+      _takeTrackRequest();
+      // Location may have been allowed in the phone's settings meanwhile;
+      // places already watched are left alone.
+      final rules = ref.read(placeRulesProvider).value;
+      if (rules != null && rules.isNotEmpty) ref.read(placeTimerProvider).sync(rules).ignore();
+    }
+  }
+
+  bool _tracking = false;
+
+  /// ZT Tasks or ZT Calendar opened Time to track time on a task or an
+  /// event (see lib/links/zt_links.dart). An event's times become an entry
+  /// to check and save; otherwise a timer starts once the user agrees.
+  /// Either way Time then goes back to the app that asked.
+  Future<void> _takeTrackRequest() async {
+    if (_tracking) return;
+    _tracking = true;
+    try {
+      final links = ref.read(ztLinksProvider);
+      final request = await links.takeTrackRequest();
+      if (request == null || !mounted) return;
+      final repo = ref.read(timeRepositoryProvider);
+      final link = request.link;
+      // Time spent on the same task before: same project, tags, billable.
+      final before = link == null ? null : await repo.lastLinkedTo(link);
+      if (!mounted) return;
+      if (request.isLog) {
+        final saved = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (_) => EntryEditorPage(
+              draft: TimeEntry(
+                id: TimeRepository.newId(),
+                space: ref.read(workspaceProvider),
+                description: request.title,
+                projectId: before?.projectId,
+                tags: before?.tags ?? const [],
+                billable: before?.billable ?? false,
+                link: link,
+                start: request.start!,
+                end: request.end,
+              ),
+            ),
+          ),
+        );
+        await _publishNow();
+        await links.finishTrack(saved: saved == true);
+        return;
+      }
+      final app = linkedAppName(request.app);
+      final start = await showDialog<bool>(
+        context: context,
+        builder: (d) => AlertDialog(
+          title: Text(d.l10n.trackStartQuestion),
+          content: Text(
+            request.title.isEmpty
+                ? d.l10n.trackStartUntitled(app)
+                : d.l10n.trackStartBody(request.title, app),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(d).pop(false), child: Text(d.l10n.cancel)),
+            TextButton(onPressed: () => Navigator.of(d).pop(true), child: Text(d.l10n.start)),
+          ],
+        ),
+      );
+      if (start == true) {
+        final started = await repo.start(
+          description: request.title,
+          projectId: before?.projectId,
+          tags: before?.tags ?? const [],
+          billable: before?.billable ?? false,
+          link: link,
+        );
+        await _publishNow(running: started.id);
+      }
+      await links.finishTrack(saved: start == true);
+    } on Object catch (e) {
+      debugPrint('Track request not handled: $e');
+    } finally {
+      _tracking = false;
+    }
+  }
+
+  /// Shows the notification and the widget right away instead of after the
+  /// usual short wait: going back to the other app may close Time first.
+  /// Waits up to a second for the timer [running] to show up.
+  Future<void> _publishNow({String? running}) async {
+    for (var i = 0; running != null && i < 20; i++) {
+      if (ref.read(runningProvider).any((e) => e.id == running)) break;
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      if (!mounted) return;
+    }
+    _debounce?.cancel();
+    await _apply();
   }
 
   /// Starts and stops tapped on the widget, at the time they were tapped.
@@ -181,7 +297,8 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
     final lines = await widget.pendingLines();
     if (lines.isEmpty) return;
     final repo = ref.read(timeRepositoryProvider);
-    final projects = {for (final p in await repo.allProjects()) p.id: p};
+    // Started on the widget or by place: in the workspace on screen.
+    final projects = {for (final p in await repo.currentProjects()) p.id: p};
     for (final line in lines) {
       for (final t in WidgetTimerAction.parse(line)) {
         if (t.stop) {
@@ -198,14 +315,17 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
   /// A start saved just before the app was closed, and not yet taken off the
   /// queue, is not started a second time.
   bool _alreadyStarted(DateTime at) =>
-      ref.read(entriesProvider).value?.any((e) => e.running && e.start == at) ?? false;
+      ref.read(runningProvider).any((e) => e.start == at);
 
   Future<void> _publishWidget() async {
-    final entries = ref.read(entriesProvider).value;
+    final mine = ref.read(myEntriesProvider).value;
     final projects = ref.read(projectsProvider).value;
-    if (entries == null || projects == null) return;
+    if (mine == null || projects == null) return;
+    // A timer running in another workspace (a team, or the account's own
+    // time) shows too.
+    final running = ref.read(runningProvider);
     final next = TimerWidgetState.from(
-      entries: entries,
+      entries: [...running, for (final e in mine) if (!e.running) e],
       projects: projects,
       details: ref.read(timeSettingsProvider).widgetDetails,
     );
@@ -273,6 +393,11 @@ class _TimeHomeState extends ConsumerState<TimeHome> with WidgetsBindingObserver
     // Recent projects on the widget.
     ref.listen(projectsProvider, (_, _) => _schedule());
     ref.listen(entriesProvider, (_, _) => _schedule());
+    // Places to watch for start and stop by place (TM-3).
+    ref.listen(placeRulesProvider, (_, next) {
+      final rules = next.value;
+      if (rules != null) ref.read(placeTimerProvider).sync(rules).ignore();
+    });
     // The notification and widget texts follow a language change; the
     // debounce lets the new language load first.
     ref.listen(ztLanguageProvider, (_, _) => _schedule());

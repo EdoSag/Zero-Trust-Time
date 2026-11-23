@@ -930,6 +930,270 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Start a timer for {project}'**
   String widgetStartTimerFor(String project);
+
+  /// No description provided for @linkedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to {app}'**
+  String linkedTo(String app);
+
+  /// No description provided for @pickFromApp.
+  ///
+  /// In en, this message translates to:
+  /// **'From {app}'**
+  String pickFromApp(String app);
+
+  /// No description provided for @removeLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove link'**
+  String get removeLink;
+
+  /// No description provided for @linkedAppMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{app} isn\'t installed'**
+  String linkedAppMissing(String app);
+
+  /// No description provided for @trackStartQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a timer?'**
+  String get trackStartQuestion;
+
+  /// No description provided for @trackStartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" from {app}'**
+  String trackStartBody(String title, String app);
+
+  /// No description provided for @trackStartUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'A timer for {app}'**
+  String trackStartUntitled(String app);
+
+  /// No description provided for @placeTimerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start and stop by place'**
+  String get placeTimerTitle;
+
+  /// No description provided for @placeTimerSettingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the timer when you arrive at work, stop it when you leave'**
+  String get placeTimerSettingsBody;
+
+  /// No description provided for @placeTimerAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a place'**
+  String get placeTimerAdd;
+
+  /// No description provided for @placeTimerIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Time can start a timer when you arrive at a place and stop it when you leave. Your phone watches the place itself; your location never leaves the phone. Works while Time is locked: the entry is saved the next time you open it.'**
+  String get placeTimerIntro;
+
+  /// No description provided for @placeTimerEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No places yet. Add your office, a client or the studio.'**
+  String get placeTimerEmpty;
+
+  /// No description provided for @placeTimerUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed place'**
+  String get placeTimerUnnamed;
+
+  /// No description provided for @placeTimerStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'starts on arrival'**
+  String get placeTimerStarts;
+
+  /// No description provided for @placeTimerStops.
+  ///
+  /// In en, this message translates to:
+  /// **'stops on leaving'**
+  String get placeTimerStops;
+
+  /// No description provided for @placeTimerNeedsLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location all the time'**
+  String get placeTimerNeedsLocation;
+
+  /// No description provided for @placeTimerNeedsLocationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed to notice arriving and leaving while Time is closed. Tap to allow.'**
+  String get placeTimerNeedsLocationBody;
+
+  /// No description provided for @placeTimerStartOnArrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a timer when I arrive'**
+  String get placeTimerStartOnArrive;
+
+  /// No description provided for @placeTimerStartOnArriveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only when no timer is running'**
+  String get placeTimerStartOnArriveBody;
+
+  /// No description provided for @placeTimerStopOnLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop it when I leave'**
+  String get placeTimerStopOnLeave;
+
+  /// No description provided for @placeTimerStopOnLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a timer this place started; one you started yourself keeps running'**
+  String get placeTimerStopOnLeaveBody;
+
+  /// No description provided for @workspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get workspaces;
+
+  /// No description provided for @workspaceMine.
+  ///
+  /// In en, this message translates to:
+  /// **'My time'**
+  String get workspaceMine;
+
+  /// No description provided for @workspaceMineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you see it'**
+  String get workspaceMineBody;
+
+  /// No description provided for @teamUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get teamUnnamed;
+
+  /// No description provided for @teamOwnerCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner · {count, plural, =1{1 person} other{{count} people}}'**
+  String teamOwnerCount(int count);
+
+  /// No description provided for @teamMemberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 person} other{{count} people}}'**
+  String teamMemberCount(int count);
+
+  /// No description provided for @teamWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for an owner to let you in'**
+  String get teamWaiting;
+
+  /// No description provided for @teamManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Members and invites'**
+  String get teamManage;
+
+  /// No description provided for @teamJoinRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wants to join {team}'**
+  String teamJoinRequest(String name, String team);
+
+  /// No description provided for @teamJoinRequestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare the code on their phone, then let them in'**
+  String get teamJoinRequestBody;
+
+  /// No description provided for @teamCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'New team'**
+  String get teamCreate;
+
+  /// No description provided for @teamCreateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Track time together: shared projects and reports'**
+  String get teamCreateBody;
+
+  /// No description provided for @teamCreateExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone you invite tracks time on the team\'s projects, and everyone sees the team\'s reports. Only owners change projects and rates. All of it is end-to-end encrypted.'**
+  String get teamCreateExplain;
+
+  /// No description provided for @teamCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get teamCreateAction;
+
+  /// No description provided for @teamName.
+  ///
+  /// In en, this message translates to:
+  /// **'Team name'**
+  String get teamName;
+
+  /// No description provided for @teamNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example Acme Studio'**
+  String get teamNameHint;
+
+  /// No description provided for @teamYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name in the team'**
+  String get teamYourName;
+
+  /// No description provided for @teamJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a team'**
+  String get teamJoin;
+
+  /// No description provided for @teamPageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Members track time on the team\'s projects and see the team\'s reports. Owners add projects and rates and let people in.'**
+  String get teamPageBody;
+
+  /// No description provided for @teamNeedsInternet.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating a team needs the internet. Try again when you\'re online.'**
+  String get teamNeedsInternet;
+
+  /// No description provided for @byMember.
+  ///
+  /// In en, this message translates to:
+  /// **'By member'**
+  String get byMember;
+
+  /// No description provided for @memberYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get memberYou;
+
+  /// No description provided for @memberFormer.
+  ///
+  /// In en, this message translates to:
+  /// **'Former member'**
+  String get memberFormer;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {
