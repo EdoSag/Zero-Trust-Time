@@ -1057,6 +1057,54 @@ abstract class AppL10n {
   /// **'Only a timer this place started; one you started yourself keeps running'**
   String get placeTimerStopOnLeaveBody;
 
+  /// No description provided for @placeTimerRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'How close counts as there'**
+  String get placeTimerRadius;
+
+  /// No description provided for @placeTimerRadiusSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Under 100 m needs a good GPS signal. Indoors, the timer may show up a little late.'**
+  String get placeTimerRadiusSmall;
+
+  /// No description provided for @placeTimerNoWait.
+  ///
+  /// In en, this message translates to:
+  /// **'No wait'**
+  String get placeTimerNoWait;
+
+  /// No description provided for @minutesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 minute} other{{count} minutes}}'**
+  String minutesCount(int count);
+
+  /// No description provided for @placeTimerStartAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait before starting'**
+  String get placeTimerStartAfter;
+
+  /// No description provided for @placeTimerStartAfterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Passing by doesn\'t start a timer. The entry still begins when you arrived.'**
+  String get placeTimerStartAfterBody;
+
+  /// No description provided for @placeTimerStopAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait before stopping'**
+  String get placeTimerStopAfter;
+
+  /// No description provided for @placeTimerStopAfterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Back sooner, and the timer keeps running. The entry still ends when you left.'**
+  String get placeTimerStopAfterBody;
+
   /// No description provided for @workspaces.
   ///
   /// In en, this message translates to:

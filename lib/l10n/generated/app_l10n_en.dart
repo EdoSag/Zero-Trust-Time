@@ -563,6 +563,41 @@ class AppL10nEn extends AppL10n {
       'Only a timer this place started; one you started yourself keeps running';
 
   @override
+  String get placeTimerRadius => 'How close counts as there';
+
+  @override
+  String get placeTimerRadiusSmall =>
+      'Under 100 m needs a good GPS signal. Indoors, the timer may show up a little late.';
+
+  @override
+  String get placeTimerNoWait => 'No wait';
+
+  @override
+  String minutesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get placeTimerStartAfter => 'Wait before starting';
+
+  @override
+  String get placeTimerStartAfterBody =>
+      'Passing by doesn\'t start a timer. The entry still begins when you arrived.';
+
+  @override
+  String get placeTimerStopAfter => 'Wait before stopping';
+
+  @override
+  String get placeTimerStopAfterBody =>
+      'Back sooner, and the timer keeps running. The entry still ends when you left.';
+
+  @override
   String get workspaces => 'Teams';
 
   @override

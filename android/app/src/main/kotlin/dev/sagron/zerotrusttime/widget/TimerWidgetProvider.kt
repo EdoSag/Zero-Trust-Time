@@ -102,13 +102,19 @@ class TimerWidgetProvider : HomeWidgetProvider() {
     /**
      * Queues a start (for [projectId]) or a stop now, as a tap on the widget
      * does, and shows it on the widget. Also used by the running
-     * notification's Stop and by start and stop by place (PlaceTimer.kt).
+     * notification's Stop and by start and stop by place (PlaceTimer.kt),
+     * which gives the time the phone arrived or left as [at].
      * Returns the time queued, or null when signed out.
      */
-    internal fun tap(context: Context, start: Boolean, projectId: String?): Long? {
+    internal fun tap(
+        context: Context,
+        start: Boolean,
+        projectId: String?,
+        at: Long = System.currentTimeMillis(),
+    ): Long? {
         val prefs = HomeWidgetPlugin.getData(context)
         if (prefs.getBoolean("time_widget_signed_out", false)) return null
-        val now = System.currentTimeMillis()
+        val now = at
         val line = if (start) "start|$now|${projectId.orEmpty()}" else "stop|$now"
         val queue = prefs.getString("time_widget_pending", null).orEmpty()
         val editor = prefs.edit()

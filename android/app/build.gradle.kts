@@ -82,4 +82,7 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // PlaceDwellTest: start and stop by place decides in Kotlin, since it
+    // runs while the app is closed.
+    testImplementation("junit:junit:4.13.2")
 }

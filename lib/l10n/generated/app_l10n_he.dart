@@ -562,6 +562,42 @@ class AppL10nHe extends AppL10n {
       'רק טיימר שהמקום הפעיל; טיימר שהפעלת בעצמך ממשיך';
 
   @override
+  String get placeTimerRadius => 'מאיזה מרחק נחשב שהגעתי';
+
+  @override
+  String get placeTimerRadiusSmall =>
+      'פחות מ-100 מ׳ דורש קליטת GPS טובה. בתוך מבנה הטיימר עשוי להופיע באיחור קל.';
+
+  @override
+  String get placeTimerNoWait => 'בלי המתנה';
+
+  @override
+  String minutesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count דקות',
+      two: 'שתי דקות',
+      one: 'דקה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get placeTimerStartAfter => 'המתנה לפני הפעלה';
+
+  @override
+  String get placeTimerStartAfterBody =>
+      'מעבר ליד המקום לא מפעיל טיימר. הרישום עדיין מתחיל מרגע ההגעה.';
+
+  @override
+  String get placeTimerStopAfter => 'המתנה לפני עצירה';
+
+  @override
+  String get placeTimerStopAfterBody =>
+      'אם חוזרים לפני כן, הטיימר ממשיך. הרישום עדיין מסתיים ברגע היציאה.';
+
+  @override
   String get workspaces => 'צוותים';
 
   @override
