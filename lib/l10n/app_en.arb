@@ -326,6 +326,21 @@
   "placeTimerStartOnArriveBody": "Only when no timer is running",
   "placeTimerStopOnLeave": "Stop it when I leave",
   "placeTimerStopOnLeaveBody": "Only a timer this place started; one you started yourself keeps running",
+  "placeTimerRadius": "How close counts as there",
+  "placeTimerRadiusSmall": "Under 100 m needs a good GPS signal. Indoors, the timer may show up a little late.",
+  "placeTimerNoWait": "No wait",
+  "minutesCount": "{count, plural, =1{1 minute} other{{count} minutes}}",
+  "@minutesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "placeTimerStartAfter": "Wait before starting",
+  "placeTimerStartAfterBody": "Passing by doesn't start a timer. The entry still begins when you arrived.",
+  "placeTimerStopAfter": "Wait before stopping",
+  "placeTimerStopAfterBody": "Back sooner, and the timer keeps running. The entry still ends when you left.",
   "workspaces": "Teams",
   "workspaceMine": "My time",
   "workspaceMineBody": "Only you see it",

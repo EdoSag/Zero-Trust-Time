@@ -161,6 +161,12 @@ jobs:
             echo "APK=$APK"
           } >> "$GITHUB_ENV"
 
+      - name: Test the Android code
+        # Start and stop by place decides in Kotlin (PlaceDwell.kt), since it
+        # runs while the app is closed; `flutter test` can't reach it. After
+        # the build, which leaves the Gradle wrapper and compiled classes.
+        run: cd android && ./gradlew :app:testReleaseUnitTest
+
       - name: Build the Google Play bundle
         # Google Play takes an .aab, not an .apk. Built for releases (and
         # manual runs) only, so pull request checks stay fast. It has the same

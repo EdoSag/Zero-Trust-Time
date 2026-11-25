@@ -182,12 +182,37 @@ class _PlaceRuleEditorPageState extends ConsumerState<PlaceRuleEditorPage> {
       initialPlace: _rule.place,
       newId: TimeRepository.newId,
     );
-    if (choice != null && mounted) setState(() => _rule = _rule.copyWith(place: choice.place));
+    // The picker has its own distance: it wins over one chosen here before.
+    if (choice != null && mounted) {
+      setState(() => _rule = _rule.copyWith(place: choice.place, radiusMeters: null));
+    }
   }
+
+  /// "No wait", or how many minutes.
+  String _wait(int minutes) =>
+      minutes == 0 ? context.l10n.placeTimerNoWait : context.l10n.minutesCount(minutes);
+
+  Future<int?> _pickWait(String title, int current) => showDialog<int>(
+    context: context,
+    builder: (d) => SimpleDialog(
+      title: Text(title),
+      children: [
+        for (final m in PlaceRule.waitChoices)
+          SimpleDialogOption(
+            onPressed: () => Navigator.of(d).pop(m),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Text(_wait(m) + (m == current ? '  ✓' : '')),
+            ),
+          ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final places = ZtPlacesStrings.of(context);
     final place = _rule.place;
     return Scaffold(
       appBar: AppBar(
@@ -207,9 +232,36 @@ class _PlaceRuleEditorPageState extends ConsumerState<PlaceRuleEditorPage> {
           ListTile(
             leading: const Icon(Icons.place_outlined),
             title: Text(place.name.isEmpty ? l.placeTimerUnnamed : place.name),
-            subtitle: Text('${place.position.format()} · ${place.radiusMeters.round()} m'),
+            subtitle: Text('${place.position.format()} · ${places.distance(_rule.radius)}'),
             onTap: _changePlace,
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Text(l.placeTimerRadius, style: Theme.of(context).textTheme.titleSmall),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final r in PlaceRule.radiusChoices)
+                  ChoiceChip(
+                    label: Text(places.distance(r)),
+                    selected: _rule.radius == r,
+                    onSelected: (_) => setState(() => _rule = _rule.copyWith(radiusMeters: r)),
+                  ),
+              ],
+            ),
+          ),
+          if (_rule.radius < ZtPlace.minRadius)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(
+                l.placeTimerRadiusSmall,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Align(
@@ -227,6 +279,18 @@ class _PlaceRuleEditorPageState extends ConsumerState<PlaceRuleEditorPage> {
             value: _rule.startOnArrive,
             onChanged: (v) => setState(() => _rule = _rule.copyWith(startOnArrive: v)),
           ),
+          if (_rule.startOnArrive)
+            ListTile(
+              key: const ValueKey('startAfter'),
+              leading: const Icon(Icons.hourglass_top_outlined),
+              title: Text(l.placeTimerStartAfter),
+              subtitle: Text(l.placeTimerStartAfterBody),
+              trailing: Text(_wait(_rule.startAfterMinutes)),
+              onTap: () async {
+                final m = await _pickWait(l.placeTimerStartAfter, _rule.startAfterMinutes);
+                if (m != null && mounted) setState(() => _rule = _rule.copyWith(startAfterMinutes: m));
+              },
+            ),
           SwitchListTile(
             secondary: const Icon(Icons.stop_circle_outlined),
             title: Text(l.placeTimerStopOnLeave),
@@ -234,6 +298,18 @@ class _PlaceRuleEditorPageState extends ConsumerState<PlaceRuleEditorPage> {
             value: _rule.stopOnLeave,
             onChanged: (v) => setState(() => _rule = _rule.copyWith(stopOnLeave: v)),
           ),
+          if (_rule.stopOnLeave)
+            ListTile(
+              key: const ValueKey('stopAfter'),
+              leading: const Icon(Icons.hourglass_bottom_outlined),
+              title: Text(l.placeTimerStopAfter),
+              subtitle: Text(l.placeTimerStopAfterBody),
+              trailing: Text(_wait(_rule.stopAfterMinutes)),
+              onTap: () async {
+                final m = await _pickWait(l.placeTimerStopAfter, _rule.stopAfterMinutes);
+                if (m != null && mounted) setState(() => _rule = _rule.copyWith(stopAfterMinutes: m));
+              },
+            ),
         ],
       ),
     );
