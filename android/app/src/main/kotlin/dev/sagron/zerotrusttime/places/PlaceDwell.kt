@@ -30,7 +30,7 @@ internal object PlaceDwell {
     /** While waiting for a fix good enough to tell, look again this often. */
     const val RECHECK_MS = 60_000L
 
-    /** An arrival no good fix confirmed in this time is dropped. */
+    /** An arrival no good fix has confirmed by this time is dropped. */
     const val GIVE_UP_MS = 30 * 60_000L
 
     /** A fix this exact can always tell, however small the place. */
@@ -58,6 +58,10 @@ internal object PlaceDwell {
     /** What [event] at one place changes, and what is due by now. */
     fun step(wait: PlaceWait, event: PlaceEvent, f: PlaceFacts): PlaceStep {
         var w = wait
+        var stopAt: Long? = null
+        var startAt: Long? = null
+        var running = f.timerRunning
+        var mine = f.mine
         when (event) {
             PlaceEvent.ENTER, PlaceEvent.ENTER_OUTER ->
                 if (w.leaveAt != 0L) {
@@ -73,20 +77,27 @@ internal object PlaceDwell {
                     w = w.copy(arriveFirst = f.now, arriveSeen = 0)
                 }
             PlaceEvent.LEAVE_OUTER -> {
-                // Gone before the wait was over: it was only passing by.
+                // The look that would have started the timer can come late
+                // (PlaceTimer.wakeAt). A stay that was already long enough
+                // still counts: the timer starts as of the arrival, and
+                // this leaving stops it like any other.
+                val stayed = w.arriveSeen != 0L && f.now - w.arriveSeen >= f.startAfterMs
+                if (w.arriveFirst != 0L && stayed && f.start && !running) {
+                    startAt = w.arriveSeen
+                    running = true
+                    mine = true
+                }
+                // Otherwise gone before the wait was over: only passing by.
                 w = w.copy(arriveFirst = 0, arriveSeen = 0, backAt = 0)
-                if (f.stop && f.mine && w.leaveAt == 0L) w = w.copy(leaveAt = f.now)
+                if (f.stop && mine && w.leaveAt == 0L) w = w.copy(leaveAt = f.now)
             }
             PlaceEvent.CHECK -> Unit
         }
 
-        var stopAt: Long? = null
-        var startAt: Long? = null
-        var running = f.timerRunning
-
         if (w.leaveAt != 0L) {
-            if (!f.mine) {
-                // Stopped or switched by hand meanwhile: nothing to stop.
+            if (!mine || !f.stop) {
+                // Stopped or switched by hand meanwhile, or the place was
+                // told not to stop timers any more: nothing to stop.
                 w = w.copy(leaveAt = 0, backAt = 0)
             } else if (f.now - w.leaveAt >= f.stopAfterMs) {
                 if (w.backAt != 0L && (f.seen == Seen.INSIDE || f.seen == Seen.NEAR)) {
@@ -103,12 +114,13 @@ internal object PlaceDwell {
         }
 
         if (w.arriveFirst != 0L) {
-            if (running || f.now - w.arriveFirst > GIVE_UP_MS) {
-                // A timer was started by hand, or no fix ever confirmed it.
+            if (f.seen == Seen.OUTSIDE) w = w.copy(arriveSeen = 0)
+            if (f.seen == Seen.INSIDE && w.arriveSeen == 0L) w = w.copy(arriveSeen = f.now)
+            if (running || (w.arriveSeen == 0L && f.now - w.arriveFirst > GIVE_UP_MS)) {
+                // A timer was started by hand, or no fix ever confirmed it
+                // (a confirmed arrival gets to finish its wait).
                 w = w.copy(arriveFirst = 0, arriveSeen = 0)
             } else {
-                if (f.seen == Seen.OUTSIDE) w = w.copy(arriveSeen = 0)
-                if (f.seen == Seen.INSIDE && w.arriveSeen == 0L) w = w.copy(arriveSeen = f.now)
                 // Seen inside once, and nothing since says otherwise.
                 if (w.arriveSeen != 0L && f.seen != Seen.OUTSIDE && f.now - w.arriveSeen >= f.startAfterMs) {
                     startAt = w.arriveSeen
@@ -190,7 +202,10 @@ internal data class PlaceStep(
     val wait: PlaceWait,
     /** Stop the timer, as of this time. */
     val stopAt: Long? = null,
-    /** Start a timer, as of this time. */
+    /**
+     * Start a timer, as of this time. With a [stopAt] that is not earlier,
+     * the start comes first: a whole visit noticed only as it ended.
+     */
     val startAt: Long? = null,
     /** Look again at this time. */
     val checkAt: Long? = null,

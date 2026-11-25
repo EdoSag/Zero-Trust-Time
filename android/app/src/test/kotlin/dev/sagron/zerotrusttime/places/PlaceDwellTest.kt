@@ -15,7 +15,7 @@ class PlaceDwellTest {
         val startAfter: Long = 5 * 60_000L,
         val stopAfter: Long = 5 * 60_000L,
         val start: Boolean = true,
-        val stop: Boolean = true,
+        var stop: Boolean = true,
     ) {
         var wait = PlaceWait()
         var running = false
@@ -31,16 +31,24 @@ class PlaceDwellTest {
                 event,
                 PlaceFacts(now, start, stop, startAfter, stopAfter, seen, running, mine, settled),
             )
-            step.stopAt?.let {
-                stops += it
-                running = false
-                mine = false
+            val stop = {
+                step.stopAt?.let {
+                    stops += it
+                    running = false
+                    mine = false
+                }
             }
-            step.startAt?.let {
-                starts += it
-                running = true
-                mine = true
+            val start = {
+                step.startAt?.let {
+                    starts += it
+                    running = true
+                    mine = true
+                }
             }
+            // In the order they happened, as PlaceTimer.run does.
+            val startFirst = step.startAt != null && step.stopAt != null && step.startAt <= step.stopAt
+            if (startFirst) start() else stop()
+            if (startFirst) stop() else start()
             wait = step.wait
             checkAt = step.checkAt
             return step
@@ -285,6 +293,78 @@ class PlaceDwellTest {
         noStop.at(t0 + 60 * min, PlaceEvent.LEAVE_OUTER, Seen.OUTSIDE)
         assertTrue(noStop.wait.idle)
         assertTrue(noStop.stops.isEmpty())
+    }
+
+    /** The alarm is not to the minute, and can come after the leaving. */
+    @Test
+    fun aVisitNoticedOnlyAsItEndsStillCounts() {
+        val phone = Phone()
+        phone.at(t0, PlaceEvent.ENTER)
+        val left = t0 + 10 * min
+        phone.at(left, PlaceEvent.LEAVE_OUTER, Seen.OUTSIDE)
+        assertEquals(listOf(t0), phone.starts)
+        assertTrue(phone.stops.isEmpty())
+        assertEquals(left + 5 * min, phone.checkAt)
+        phone.alarm(Seen.OUTSIDE)
+        assertEquals(listOf(left), phone.stops)
+        assertTrue(phone.wait.idle)
+    }
+
+    @Test
+    fun aVisitNoticedOnlyAsItEndsWithNoWaitToStop() {
+        val phone = Phone(stopAfter = 0)
+        phone.at(t0, PlaceEvent.ENTER)
+        val step = phone.at(t0 + 10 * min, PlaceEvent.LEAVE_OUTER, Seen.OUTSIDE)
+        assertEquals(t0, step.startAt)
+        assertEquals(t0 + 10 * min, step.stopAt)
+        assertEquals(listOf(t0), phone.starts)
+        assertEquals(listOf(t0 + 10 * min), phone.stops)
+        assertTrue(!phone.running)
+        assertNull(phone.checkAt)
+    }
+
+    @Test
+    fun aLateLookDoesNotTurnAVagueArrivalIntoAVisit() {
+        val phone = Phone()
+        phone.at(t0, PlaceEvent.ENTER, Seen.UNSURE)
+        phone.at(t0 + 10 * min, PlaceEvent.LEAVE_OUTER, Seen.OUTSIDE)
+        assertTrue(phone.starts.isEmpty())
+        assertTrue(phone.wait.idle)
+    }
+
+    @Test
+    fun aVisitNoticedLateDoesNotReplaceATimerStartedByHand() {
+        val phone = Phone()
+        phone.at(t0, PlaceEvent.ENTER)
+        phone.running = true
+        phone.at(t0 + 10 * min, PlaceEvent.LEAVE_OUTER, Seen.OUTSIDE)
+        assertTrue(phone.starts.isEmpty())
+        assertTrue(phone.stops.isEmpty())
+        assertTrue(phone.wait.idle)
+    }
+
+    @Test
+    fun switchingOffStopWhileLeavingKeepsTheTimer() {
+        val phone = Phone()
+        phone.at(t0, PlaceEvent.ENTER)
+        phone.alarm()
+        phone.at(t0 + 60 * min, PlaceEvent.LEAVE_OUTER, Seen.OUTSIDE)
+        phone.stop = false
+        phone.alarm(Seen.OUTSIDE)
+        assertTrue(phone.stops.isEmpty())
+        assertTrue(phone.running)
+        assertNull(phone.checkAt)
+    }
+
+    @Test
+    fun anArrivalConfirmedLateStillFinishesItsWait() {
+        val phone = Phone()
+        phone.at(t0, PlaceEvent.ENTER, Seen.UNSURE)
+        for (m in 1..25) phone.at(t0 + m * min, PlaceEvent.CHECK, Seen.UNSURE)
+        phone.at(t0 + 26 * min, PlaceEvent.CHECK, Seen.INSIDE)
+        assertEquals(t0 + 31 * min, phone.checkAt)
+        phone.alarm()
+        assertEquals(listOf(t0 + 26 * min), phone.starts)
     }
 
     @Test

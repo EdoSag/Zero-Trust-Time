@@ -349,18 +349,26 @@ object PlaceTimer {
                     settled = settled,
                 ),
             )
-            step.stopAt?.let {
-                TimerWidgetProvider().tap(c, start = false, projectId = null, at = it)
-                places.edit().remove("placeStarted").remove("placeStartedBy").apply()
-            }
-            step.startAt?.let {
-                val projectId = rule.optString("projectId").ifEmpty { null }
-                val at = TimerWidgetProvider().tap(c, start = true, projectId = projectId, at = it)
-                if (at != null) {
-                    places.edit().putLong("placeStarted", at).putString("placeStartedBy", id).apply()
-                    RunningTimerNotification.showStored(c, at)
+            val stop = {
+                step.stopAt?.let {
+                    TimerWidgetProvider().tap(c, start = false, projectId = null, at = it)
+                    places.edit().remove("placeStarted").remove("placeStartedBy").apply()
                 }
             }
+            val start = {
+                step.startAt?.let {
+                    val projectId = rule.optString("projectId").ifEmpty { null }
+                    val at = TimerWidgetProvider().tap(c, start = true, projectId = projectId, at = it)
+                    if (at != null) {
+                        places.edit().putLong("placeStarted", at).putString("placeStartedBy", id).apply()
+                        RunningTimerNotification.showStored(c, at)
+                    }
+                }
+            }
+            // In the order they happened (PlaceStep.startAt).
+            val startFirst = step.startAt != null && step.stopAt != null && step.startAt <= step.stopAt
+            if (startFirst) start() else stop()
+            if (startFirst) stop() else start()
             waits[id] = step.wait
             step.checkAt?.let { at -> next = minOf(next ?: at, at) }
         }
